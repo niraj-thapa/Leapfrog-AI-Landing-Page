@@ -1,0 +1,18 @@
+# dependencies and build output
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# local / OS
+.DS_Store
+*.log
+.env*
+.vercel
+
+# internal source material kept out of the repo
+*.pdf
+*.docx
+source-video/
+v2.html

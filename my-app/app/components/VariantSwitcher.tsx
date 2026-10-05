@@ -1,12 +1,23 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { VARIANT_GROUPS, variantStorageKey } from '../lib/variants';
+import { glideTo } from '../lib/glide';
+import { VARIANT_GROUPS, variantStorageKey, type VariantGroup } from '../lib/variants';
+
+/* glide to a section's place on the page, where an in-page link would land it (clear of the
+ * header, with its own scroll-margin), plus its offset for pinned sections */
+function goTo(g: VariantGroup) {
+  const el = g.target ? document.getElementById(g.target) : null;
+  if (!el) return;
+  const pad = (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) + (parseFloat(getComputedStyle(el).scrollMarginTop) || 0);
+  glideTo(el.getBoundingClientRect().top + window.scrollY - pad + (g.targetOffset ?? 0) * window.innerHeight);
+}
 
 /* The review button: a floating button at the bottom right that opens a panel listing
  * every section with versions under review (lib/variants.ts) — pick one and the page
- * switches at once. Escape or a click outside closes the panel. Remove it (and the
- * script in layout.tsx) once the versions are settled. */
+ * switches at once and glides to that section, so the change is in view (colour options
+ * stay put). Escape or a click outside closes the panel. Remove it (and the script in
+ * layout.tsx) once the versions are settled. */
 export default function VariantSwitcher() {
   const [open, setOpen] = useState(false);
   const [chosen, setChosen] = useState<Record<string, string>>({});
@@ -38,7 +49,8 @@ export default function VariantSwitcher() {
     };
   }, [open]);
 
-  const pick = (key: string, value: string, isDefault: boolean) => {
+  const pick = (g: VariantGroup, value: string, isDefault: boolean) => {
+    const key = g.key;
     const root = document.documentElement;
     if (isDefault) delete root.dataset[key];
     else root.dataset[key] = value;
@@ -50,6 +62,8 @@ export default function VariantSwitcher() {
     requestAnimationFrame(() => {
       window.dispatchEvent(new Event('fw:layout'));
       window.dispatchEvent(new CustomEvent('variant-change', { detail: { key, value } }));
+      /* once the new version has laid out: take the visitor to it */
+      requestAnimationFrame(() => goTo(g));
     });
   };
 
@@ -58,7 +72,7 @@ export default function VariantSwitcher() {
   return (
     <div ref={rootRef} className="vs">
       {open && (
-        <div className="vs-panel" id="vs-panel" role="dialog" aria-label="Section versions">
+        <div className="vs-panel" id="vs-panel" data-lenis-prevent role="dialog" aria-label="Section versions">
           <p className="vs-title">Section versions</p>
           {VARIANT_GROUPS.map((g) => (
             <div key={g.key} className="vs-group" role="group" aria-label={g.label}>
@@ -73,9 +87,12 @@ export default function VariantSwitcher() {
                     type="button"
                     aria-pressed={chosen[g.key] === o.value}
                     title={o.note}
-                    onClick={() => pick(g.key, o.value, i === 0)}
+                    aria-label={o.swatch ? o.note : undefined}
+                    className={o.swatch ? 'vs-swatch' : undefined}
+                    style={o.swatch ? { ['--sw' as string]: o.swatch } : undefined}
+                    onClick={() => pick(g, o.value, i === 0)}
                   >
-                    V{o.value}
+                    {o.swatch ? <span aria-hidden="true" /> : `V${o.value}`}
                   </button>
                 ))}
               </div>

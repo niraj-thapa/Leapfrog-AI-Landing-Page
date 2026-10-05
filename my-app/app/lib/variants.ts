@@ -9,18 +9,30 @@
  *
  * To add a section: add a group here, then style its versions with html[data-{key}]. */
 
-export type VariantOption = { value: string; note: string };
+export type VariantOption = { value: string; note: string; swatch?: string /* a colour option: shown as a swatch */ };
 export type VariantGroup = {
   key: string; // the data attribute and URL parameter (letters only)
   label: string; // the section's name in the switcher
+  target?: string; // the section's id: picking a version scrolls there (none: stay put)
+  targetOffset?: number; // …this many viewport heights further in (a pinned section's revealed point)
   options: VariantOption[]; // the first is the default
   legacy?: string; // an older localStorage key to carry over
 };
 
 export const VARIANT_GROUPS: VariantGroup[] = [
   {
+    key: 'brand',
+    label: 'Primary colour',
+    options: [
+      { value: '1', note: 'Leapfrog green #038E43', swatch: '#038e43' },
+      { value: '2', note: 'Deep teal #014841', swatch: '#014841' },
+      { value: '3', note: 'Forest green #28775C', swatch: '#28775c' },
+    ],
+  },
+  {
     key: 'fw',
     label: 'Flywheel',
+    target: 'flywheel',
     legacy: 'fw-variant',
     options: [
       { value: '1', note: 'Cards around the ring' },
@@ -33,6 +45,7 @@ export const VARIANT_GROUPS: VariantGroup[] = [
   {
     key: 'why',
     label: 'Measured by your outcomes',
+    target: 'why',
     options: [
       { value: '1', note: 'Pillar explorer, picture panel' },
       { value: '2', note: 'Scroll story, sticky index and panel' },
@@ -41,6 +54,7 @@ export const VARIANT_GROUPS: VariantGroup[] = [
   {
     key: 'roadmap',
     label: 'Start focused',
+    target: 'work-together',
     options: [
       { value: '1', note: 'Four stage cards' },
       { value: '2', note: 'Tabbed photo panel' },
@@ -49,6 +63,8 @@ export const VARIANT_GROUPS: VariantGroup[] = [
   {
     key: 'talk',
     label: 'Talk to our team',
+    target: 'talk',
+    targetOffset: 0.5, // TalkBand LAND: the scene revealed
     legacy: 'talk-variant',
     options: [
       { value: '1', note: 'Ripple rings' },

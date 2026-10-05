@@ -10,6 +10,7 @@ import { ROADMAP } from '../lib/content';
  * stage shows its description and a line fills its hairline (5s, eased in and out);
  * then the next opens and the photo crossfades. Inactive titles sit at 54%. It plays only
  * while the panel is on screen, holding where it was otherwise; a click opens a stage.
+ * The type is the brand face (Tomato Grotesk), over a dark scrim (top and bottom).
  * Reduced motion: no auto-advance. Photos: Unsplash placeholders (credits in design.md). */
 
 const DWELL = 5000;
@@ -63,7 +64,13 @@ export default function StageTabs() {
               className={`stage-tab${open ? ' is-active' : ''}`}
               onClick={() => setActive(i)}
             >
-              <span className="stage-tab-title">{st.title}</span>
+              <span className="stage-tab-head">
+                {/* the stage's icon, as on the V1 cards: in its stage colour once the tab is open */}
+                <span className="stage-tab-icon" aria-hidden="true">
+                  <span className="stage-glyph" style={{ ['--icon' as string]: `url(${st.icon})` }} />
+                </span>
+                <span className="stage-tab-title">{st.title}</span>
+              </span>
               <span className="stage-tab-detail">
                 <span className="stage-tab-body">{st.body}</span>
               </span>

@@ -1,6 +1,9 @@
+import { getLenis } from './smooth';
+
 /* Smooth, eased page glides (in-page links, the hero → Flywheel snap).
  *
- * One glide at a time; any new wheel, touch or key input from the visitor stops it
+ * With smooth scrolling on (Lenis), the glide is handed to Lenis so the two never
+ * pull the page in different directions. One glide at a time; any new wheel, touch or key input from the visitor stops it
  * and hands the page straight back. Everything on the page that follows the scroll
  * (the hero mosaic, the ring's flight, the theme) simply plays along. Reduced
  * motion: jumps instead. */
@@ -14,6 +17,9 @@ let listening = false;
 export const isGliding = () => active;
 
 export function stopGlide() {
+  const lenis = getLenis();
+  /* cancel a Lenis glide where it is (a wheel already takes it over by itself) */
+  if (active && lenis) lenis.scrollTo(lenis.animatedScroll, { immediate: true, force: true });
   if (raf) cancelAnimationFrame(raf);
   raf = 0;
   active = false;
@@ -23,7 +29,11 @@ function listen() {
   if (listening || typeof window === 'undefined') return;
   listening = true;
   const stop = () => active && stopGlide();
-  window.addEventListener('wheel', stop, { passive: true });
+  /* under Lenis the wheel itself takes the glide over; only the flag needs clearing */
+  window.addEventListener('wheel', () => {
+    if (active && getLenis()) active = false;
+    else stop();
+  }, { passive: true });
   window.addEventListener('touchstart', stop, { passive: true });
   window.addEventListener('keydown', stop);
 }
@@ -42,6 +52,21 @@ export function glideTo(top: number, ms?: number, onDone?: () => void) {
     return;
   }
   const duration = ms ?? Math.min(1700, Math.max(700, 520 + Math.abs(dist) * 0.32));
+  const lenis = getLenis();
+  if (lenis) {
+    active = true;
+    lenis.scrollTo(goal, {
+      duration: duration / 1000,
+      easing: inOut,
+      force: true,
+      onComplete: () => {
+        if (!active) return;
+        active = false;
+        onDone?.();
+      },
+    });
+    return;
+  }
   const t0 = performance.now();
   active = true;
   const step = (now: number) => {

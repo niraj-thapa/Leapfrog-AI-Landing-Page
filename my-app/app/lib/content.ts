@@ -136,6 +136,9 @@ export const METRICS = [
     did: 'We built and integrated the extraction and review workflow.',
     service: 'AI Solutions',
     serviceHref: '/solutions',
+    /* PLACEHOLDER — the client's logo (white); SecondLook's for now */
+    client: 'SecondLook Health',
+    logo: '/assets/logo-secondlook.svg',
     href: '/case-studies/healthcare',
   },
   {
@@ -146,6 +149,9 @@ export const METRICS = [
     did: 'We agreed the success metric up front and measured against it.',
     service: 'AI Solutions',
     serviceHref: '/solutions',
+    /* PLACEHOLDER — the client's logo (white); SecondLook's for now */
+    client: 'SecondLook Health',
+    logo: '/assets/logo-secondlook.svg',
     href: '/case-studies',
   },
   {
@@ -156,6 +162,9 @@ export const METRICS = [
     did: 'We delivered the document workflow and its evaluation harness.',
     service: 'AI Solutions',
     serviceHref: '/solutions',
+    /* PLACEHOLDER — the client's logo (white); SecondLook's for now */
+    client: 'SecondLook Health',
+    logo: '/assets/logo-secondlook.svg',
     href: '/case-studies/financial-services',
   },
   {
@@ -166,6 +175,9 @@ export const METRICS = [
     did: 'We designed the review interface and the human-oversight model.',
     service: 'AI Solutions',
     serviceHref: '/solutions',
+    /* PLACEHOLDER — the client's logo (white); SecondLook's for now */
+    client: 'SecondLook Health',
+    logo: '/assets/logo-secondlook.svg',
     href: '/case-studies/healthcare',
   },
 ];
@@ -177,7 +189,7 @@ export const STORY = {
   headline: 'From first use case to roadmap',
   client: 'SecondLook Health',
   person: 'Sierra Manker',
-  role: 'Cofounder & Head of Product, SecondLook Health',
+  role: 'Cofounder & Head of Product',
   href: '/case-studies/secondlook-health',
   beats: [
     { k: 'The problem', v: '[The problem the team was solving]' },
@@ -186,7 +198,13 @@ export const STORY = {
     { k: 'Measured result', v: 'Review time down 70–90% with clinician sign-off retained' },
     { k: 'What the partnership built next', v: '[What the partnership built next]' },
   ],
-  timeline: ['Start', 'Live · 9 weeks', 'Result · 70–90% faster review', 'Next phase'],
+  /* the path, step by step: done, done, done, then what comes next */
+  timeline: [
+    { k: 'Start', v: 'Kickoff' },
+    { k: 'Live', v: '9 weeks' },
+    { k: 'Result', v: '70–90% faster review' },
+    { k: 'Next', v: 'The next phase', next: true },
+  ],
 };
 
 /* ── 5 Start focused. Build for the long run. ────────────────────────────── */

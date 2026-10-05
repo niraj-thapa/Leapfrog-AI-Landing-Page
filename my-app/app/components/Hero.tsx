@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { CONTACT_HREF, CTA_LABEL, HERO } from '../lib/content';
+import { getLenis } from '../lib/smooth';
 import CredibilityMarquee, { AnthropicMark } from './Credibility';
 
 /* Two cuts of Animatics v1 (encoded from the 65 MB master, which lives outside
@@ -45,6 +46,7 @@ function FilmDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
     document.addEventListener('fullscreenchange', onFs);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    getLenis()?.stop(); // hold the page still behind the film
     closeRef.current?.focus();
 
     const v = videoRef.current;
@@ -63,6 +65,7 @@ function FilmDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
       document.removeEventListener('fullscreenchange', onFs);
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
       document.body.style.overflow = prev;
+      getLenis()?.start();
       videoRef.current?.pause();
     };
   }, [open]);
@@ -70,7 +73,7 @@ function FilmDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Leapfrog film" className="film-backdrop" onClick={onClose}>
+    <div role="dialog" aria-modal="true" aria-label="Leapfrog film" className="film-backdrop" data-lenis-prevent onClick={onClose}>
       <div className="film-panel" onClick={(e) => e.stopPropagation()}>
         <div ref={frameRef} className="film-frame">
           <div className="film-tools">
@@ -464,7 +467,7 @@ export default function Hero() {
     let lastInput = -Infinity;
     const maybeSnap = () => {
       if (reduced || snapping || filmOpenRef.current) return;
-      if (performance.now() - lastInput > 1200) return;
+      if (performance.now() - lastInput > 2000) return;
       const r = rel();
       const dock = H * DOCK;
       if (r <= 1 || r >= dock - 1) return;
@@ -473,8 +476,13 @@ export default function Hero() {
     };
     const onScroll = () => {
       const y = window.scrollY;
-      if (!snapping && y !== prevY) dir = y > prevY ? 1 : -1;
-      prevY = y;
+      /* the direction of travel turns only after a real move (16px): the small rebound
+       * some trackpads send as a swipe ends must not read as heading back */
+      if (snapping) prevY = y;
+      else if (Math.abs(y - prevY) > 16) {
+        dir = y > prevY ? 1 : -1;
+        prevY = y;
+      }
       kick();
       clearTimeout(idle);
       if (!snapping) idle = window.setTimeout(maybeSnap, SNAP_IDLE);

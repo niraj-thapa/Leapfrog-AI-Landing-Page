@@ -11,6 +11,7 @@ import ThemeController from './components/ThemeController';
 import TileFlight from './components/TileFlight';
 import VariantSwitcher from './components/VariantSwitcher';
 import SmoothAnchors from './components/SmoothAnchors';
+import SmoothScroll from './components/SmoothScroll';
 import WhyLeapfrog from './components/WhyLeapfrog';
 
 /* Scroll order follows Design Brief v8: Hero, AI Flywheel, Why Leapfrog, Client
@@ -33,6 +34,7 @@ export default function Page() {
       <RevealController />
       <ThemeController />
       <TileFlight />
+      <SmoothScroll />
       <SmoothAnchors />
       {/* review button: section versions (lib/variants.ts) — remove once they are settled */}
       <VariantSwitcher />

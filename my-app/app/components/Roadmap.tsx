@@ -26,7 +26,8 @@ export default function Roadmap() {
           {ROADMAP.stages.map((s, i) => (
             <li key={s.title} className="stage-card" data-tone={STAGE_TONES[i]}>
               <span className="stage-icon">
-                <img src={s.icon} alt="" width={28} height={28} />
+                {/* the icon drawn in its stage's ink (the SVG as a mask), like the tile, number and timing */}
+                <span className="stage-glyph" style={{ ['--icon' as string]: `url(${s.icon})` }} aria-hidden="true" />
               </span>
               <h3>{s.title}</h3>
               <p className="stage-when">{s.when}</p>

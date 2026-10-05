@@ -81,8 +81,18 @@ const WHEEL_ALT =
  *
  * Versions 4 and 5 (5 on a dark ground): the liquid plays on its own — the colour travels
  * round the ring and each stage's card opens as it arrives (fw:flow from flywheel.js).
- * A choice by the visitor (a pill, an arrow, the ring) holds that stage for 8s, then the
- * colour flows on from there. */
+ * A choice by the visitor (a pill or the ring) holds that stage for 8s, then the
+ * colour flows on from there. No arrows; the header's promise line sits above the list
+ * instead (left-aligned). The cards hold still while the section arrives and its items
+ * rise in (TileFlight: .is-flight / .is-assembling), then catch up with the colour. */
+/* the promise line: under the heading (versions 1–3), above the list (versions 4–5) */
+const PROMISE = (
+  <>
+    We start your flywheel with <strong>a quick win, live in weeks</strong>, then keep it turning{' '}
+    <strong>across every team</strong> until <strong>your whole business is reimagined</strong>.
+  </>
+);
+
 type Size = { w: number; h: number; cw: number; ch: number };
 const OPEN_W = 440;
 const HOLD_MS = 8000; // versions 4–5: how long a visitor's choice holds the liquid before it flows on
@@ -151,13 +161,20 @@ function StageList() {
     const fw = document.getElementById('flywheel');
     if (!fw || !auto || hold) return;
     const follow = (k?: string) => {
+      if (fw.classList.contains('is-flight') || fw.classList.contains('is-assembling')) return; // arriving: hold still
       const i = PANELS.findIndex((p) => p.k === k);
       if (i >= 0) setOpen(i);
     };
     follow(fw.dataset.flow);
     const onFlow = (e: Event) => follow((e as CustomEvent<string>).detail);
+    /* caught up once the section has arrived and its items have risen in */
+    const mo = new MutationObserver(() => follow(fw.dataset.flow));
+    mo.observe(fw, { attributes: true, attributeFilter: ['class'] });
     fw.addEventListener('fw:flow', onFlow);
-    return () => fw.removeEventListener('fw:flow', onFlow);
+    return () => {
+      fw.removeEventListener('fw:flow', onFlow);
+      mo.disconnect();
+    };
   }, [auto, hold]);
 
   /* a click on the ring opens its stage here */
@@ -179,14 +196,20 @@ function StageList() {
 
   return (
     <div className="fw-list-wrap">
-      <div className="fw-list-nav">
-        <button type="button" aria-label="Previous stage" disabled={open === 0} onClick={() => step(-1)}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
-        </button>
-        <button type="button" aria-label="Next stage" disabled={open === last} onClick={() => step(1)}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-        </button>
-      </div>
+      {/* versions 4–5: the header's promise line, above the list */}
+      <p className="fw-promise fw-list-lead">
+        {PROMISE}
+      </p>
+      {!auto && (
+        <div className="fw-list-nav">
+          <button type="button" aria-label="Previous stage" disabled={open === 0} onClick={() => step(-1)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
+          </button>
+          <button type="button" aria-label="Next stage" disabled={open === last} onClick={() => step(1)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+          </button>
+        </div>
+      )}
       <ul className={`fw-list${sizes ? ' is-measured' : ''}`} ref={listRef} aria-label="Flywheel stages">
         {PANELS.map((p, i) => {
           const isOpen = i === open;
@@ -279,10 +302,7 @@ export default function Flywheel() {
             You’ve seen AI <span>pilots that never ship</span>, <span>tools your teams never adopt</span>,{' '}
             <span>roadmaps that gather dust</span>.
           </p>
-          <p className="fw-promise">
-            We start your flywheel with <strong>a quick win, live in weeks</strong>, then keep it turning{' '}
-            <strong>across every team</strong> until <strong>your whole business is reimagined</strong>.
-          </p>
+          <p className="fw-promise fw-head-promise">{PROMISE}</p>
         </header>
 
         <div className="fw-stage">

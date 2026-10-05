@@ -718,6 +718,7 @@ function startGL(THREE) {
     uWin: { value: opts.dark ? 0 : 1 },                  // its window panes: off on a dark band, where they read as hard blocks
     uCaustic: { value: C('#ffffff') }, uCausticAmt: { value: 0.5 },
     uShine: { value: 1 },
+    uPop: { value: 0 },   // as a tile: deeper walls and a bright rim, so the small ring stands off its pale tile
   };
   const glass = new THREE.Mesh(revolve(RM, GA, GB, GE, isSmall ? 200 : 300, 160), new THREE.ShaderMaterial({
     uniforms: glassU,
@@ -736,7 +737,7 @@ function startGL(THREE) {
       uniform vec3 uEnvLo, uEnvHi, uLight, uLightCol, uCaustic;
       uniform float uRM, uCausticAmt;
       uniform float uSeam[5];
-      uniform float uSeamOn, uStudio, uWin;
+      uniform float uSeamOn, uStudio, uWin, uPop;
       varying vec3 vN, vV, vP, vL, vT;
 
       // studio for option 2: hard-edged light sources (window panes + strips), the way glass
@@ -767,7 +768,7 @@ function startGL(THREE) {
           float sd = (mod(seamA - uSeam[i] + 3.14159265, 6.2831853) - 3.14159265) * seamRho;
           if (abs(sd) < abs(seamD)) seamD = sd;
         }
-        float seamG = exp(-pow(seamD / 0.014, 2.0)) * uSeamOn;
+        float seamG = exp(-pow(seamD / 0.014, 2.0)) * uSeamOn * (1.0 - 0.6 * uPop);   // softer on the tile
         n = normalize(n + normalize(vT) * sign(seamD) * seamG * 0.55);
         float ndv = clamp(dot(n, v), 0.0, 1.0);
         float edge = 1.0 - ndv;
@@ -801,6 +802,11 @@ function startGL(THREE) {
         float raa = max(fwidth(rf.x) + fwidth(rf.y), 1e-4);              // one pixel in reflection space
         vec3 refl = env(rf, raa) * mix(vec3(1.0), film, 0.4) * 0.8;       // shine −20%
         col = col * (1.0 - F * uShine) + refl * F * uShine;
+
+        // as a tile: the walls deepen toward the silhouette and a bright rim traces it
+        col = mix(vec3(dot(col, vec3(0.299, 0.587, 0.114))), col, 1.0 + 1.6 * uPop);   // richer colour through the glass
+        col *= mix(vec3(1.0), vec3(0.6, 0.58, 0.86), uPop * smoothstep(0.3, 0.92, edge));   // indigo depth toward the silhouette
+        col = mix(col, vec3(1.0), uPop * 0.75 * smoothstep(0.93, 0.99, edge));
 
         // the cursor's light rides across the surface
         vec3 Lc = normalize(uLight - vP);
@@ -1063,8 +1069,9 @@ function startGL(THREE) {
       layout();
     }
     const fl = FL.active;
-    const shine = fl ? 1 - FL.calm : 1;
+    const shine = fl ? 1 - 0.65 * FL.calm : 1;   // some of the studio's shine stays on the tile
     glassU.uShine.value = shine;
+    glassU.uPop.value = fl ? Math.pow(FL.calm, 2.5) : 0;   // full on the tile, gone early in the flight
     bubbleU.uScale.value = fl ? Math.min(1, flightScale / baseScale) : 1;
     const pose = opts.pose || null;   // decorative: moved by the page (scroll)
     const sc = (fl ? flightScale : baseScale) * (0.94 + 0.06 * io) * (pose ? Math.max(0.001, pose.scale) : 1);

@@ -177,7 +177,7 @@ export default function TalkBand() {
     let lastInput = -Infinity, prevY = window.scrollY, dir = 0, snapIdle = 0;
     const onInput = () => (lastInput = performance.now());
     const maybeSnap = () => {
-      if (isGliding() || performance.now() - lastInput > 1200) return;
+      if (isGliding() || performance.now() - lastInput > 2000) return;
       const H = window.innerHeight;
       const y = window.scrollY;
       const top = y + track.getBoundingClientRect().top;
@@ -190,8 +190,13 @@ export default function TalkBand() {
     };
     const onScroll = () => {
       const y = window.scrollY;
-      if (!isGliding() && y !== prevY) dir = y > prevY ? 1 : -1;
-      prevY = y;
+      /* the direction of travel turns only after a real move (16px): the small rebound
+       * some trackpads send as a swipe ends must not read as heading back */
+      if (isGliding()) prevY = y;
+      else if (Math.abs(y - prevY) > 16) {
+        dir = y > prevY ? 1 : -1;
+        prevY = y;
+      }
       kick();
       window.clearTimeout(snapIdle);
       snapIdle = window.setTimeout(maybeSnap, SNAP_IDLE);

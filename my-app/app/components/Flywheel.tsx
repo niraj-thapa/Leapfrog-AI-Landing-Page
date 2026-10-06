@@ -88,8 +88,7 @@ const WHEEL_ALT =
 /* the promise line: under the heading (versions 1–3), above the list (versions 4–5) */
 const PROMISE = (
   <>
-    We start your flywheel with <strong>a quick win, live in weeks</strong>, then keep it turning{' '}
-    <strong>across every team</strong> until <strong>your whole business is reimagined</strong>.
+    Our <strong>AI flywheel</strong> turns quick wins into momentum that builds across your business.
   </>
 );
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import ClientStories from './ClientStories';
 import { METRICS, RESULTS_EYEBROW, RESULTS_HEADLINE, RESULTS_LEAD, STORY } from '../lib/content';
 
 /* Client results delivered — after squareup.com's "Keep your business growing"
@@ -13,6 +14,14 @@ import { METRICS, RESULTS_EYEBROW, RESULTS_HEADLINE, RESULTS_LEAD, STORY } from 
  * scrolls in, each panel opens out from a 25% inset while its photo settles from 1.2×.
  * Photos: Unsplash (credits in design.md). Module 4 of the brief; the featured story
  * follows. (The industry strip was removed; its line is now the lead under the title.) */
+
+/* HIPAA · SOC 2 · PCI DSS · GDPR — marks from Figma (Vyaguta Dashboard 541:3250), at its sizes */
+const COMPLIANCE = [
+  { name: 'HIPAA', icon: '/assets/compliance/hipaa.svg', w: 56 },
+  { name: 'SOC2', icon: '/assets/partners/soc2-mono.svg', w: 52 }, // the hero marquee's SOC 2 seal
+  { name: 'PCI', icon: '/assets/compliance/pci.png', w: 48 },
+  { name: 'GDPR', icon: '/assets/compliance/gdpr.png', w: 48 },
+];
 
 const METRIC_TONES = ['validate', 'build', 'enable', 'accelerate'];
 
@@ -65,10 +74,37 @@ export default function Results() {
           <h2 id="results-title" className="results-title">
             {RESULTS_HEADLINE}
           </h2>
-          <p className="lead results-lead">{RESULTS_LEAD}</p>
+          {/* the lead's first sentence in strong */}
+          <p className="lead results-lead">
+            <strong>{RESULTS_LEAD.slice(0, RESULTS_LEAD.indexOf('.') + 1)}</strong>
+            {RESULTS_LEAD.slice(RESULTS_LEAD.indexOf('.') + 1)}
+          </p>
         </div>
       </div>
 
+      {/* version 2 (html[data-results="2"], review button): the client stories as tabs */}
+      <div className="results-v2">
+        <div className="wrap">
+          <ClientStories />
+          {/* the compliance standards we work to, under the stories (Figma 541:3250) */}
+          <ul className="compliance" aria-label="Compliance">
+            {COMPLIANCE.map((c) => (
+              <li key={c.name}>
+                <span className="compliance-mark">
+                  <img src={c.icon} alt="" style={{ width: c.w }} />
+                </span>
+                <span className="compliance-name">
+                  {c.name}
+                  <img className="compliance-check" src="/assets/compliance/check.svg" alt="" aria-hidden="true" />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* version 1: the photo panels and the featured story */}
+      <div className="results-v1">
       <div className="growth" ref={rowRef}>
         {METRICS.map((m, i) => {
           const open = i === active;
@@ -176,6 +212,7 @@ export default function Results() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

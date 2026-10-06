@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { glideTo } from '../lib/glide';
-import { VARIANT_GROUPS, variantStorageKey, type VariantGroup } from '../lib/variants';
+import { VARIANT_GROUPS, defaultValue, variantStorageKey, type VariantGroup } from '../lib/variants';
 
 /* glide to a section's place on the page, where an in-page link would land it (clear of the
  * header, with its own scroll-margin), plus its offset for pinned sections */
@@ -16,10 +16,10 @@ function goTo(g: VariantGroup) {
 /* The review button: a floating button at the bottom right that opens a panel listing
  * every section with versions under review (lib/variants.ts) — pick one and the page
  * switches at once and glides to that section, so the change is in view (colour options
- * stay put). Escape or a click outside closes the panel. Remove it (and the script in
+ * stay put). It opens on arrival; the button turns into a × to close it (or Escape). Remove it (and the script in
  * layout.tsx) once the versions are settled. */
 export default function VariantSwitcher() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true); // open on arrival; the button (now a ×) or Escape closes it
   const [chosen, setChosen] = useState<Record<string, string>>({});
   const rootRef = useRef<HTMLDivElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
@@ -38,15 +38,8 @@ export default function VariantSwitcher() {
         fabRef.current?.focus();
       }
     };
-    const onDown = (e: PointerEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
     document.addEventListener('keydown', onKey);
-    document.addEventListener('pointerdown', onDown);
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.removeEventListener('pointerdown', onDown);
-    };
+    return () => document.removeEventListener('keydown', onKey);
   }, [open]);
 
   const pick = (g: VariantGroup, value: string, isDefault: boolean) => {
@@ -67,7 +60,7 @@ export default function VariantSwitcher() {
     });
   };
 
-  const changed = VARIANT_GROUPS.filter((g) => chosen[g.key] && chosen[g.key] !== g.options[0].value).length;
+  const changed = VARIANT_GROUPS.filter((g) => chosen[g.key] && chosen[g.key] !== defaultValue(g)).length;
 
   return (
     <div ref={rootRef} className="vs">
@@ -106,15 +99,21 @@ export default function VariantSwitcher() {
         className="vs-fab"
         aria-expanded={open}
         aria-controls="vs-panel"
-        aria-label="Section versions"
+        aria-label={open ? 'Close section versions' : 'Section versions'}
         onClick={() => setOpen((o) => !o)}
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 3l9 5-9 5-9-5 9-5z" />
-          <path d="M3 13l9 5 9-5" />
-          <path d="M3 17.5l9 5 9-5" opacity="0.5" />
-        </svg>
-        {changed > 0 && <span className="vs-badge" aria-hidden="true">{changed}</span>}
+        {open ? (
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3l9 5-9 5-9-5 9-5z" />
+            <path d="M3 13l9 5 9-5" />
+            <path d="M3 17.5l9 5 9-5" opacity="0.5" />
+          </svg>
+        )}
+        {!open && changed > 0 && <span className="vs-badge" aria-hidden="true">{changed}</span>}
       </button>
     </div>
   );

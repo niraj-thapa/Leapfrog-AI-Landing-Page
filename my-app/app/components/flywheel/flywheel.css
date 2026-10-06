@@ -650,6 +650,35 @@ body.fw-locked { overflow: hidden; }
   .panel-items { gap: 3px; }
 }
 
+/* Version 1 (the default, no html[data-fw]), Oct 6: full size — the header and the cards
+ * are not zoomed down, each card's points sit on one line (the card is as wide as its
+ * longest point), and the heading keeps the page's usual gap above the ring (--head-gap,
+ * as the other sections' heads). The section may run taller than one screen. */
+@media (min-width: 821px) {
+  html:not([data-fw]) .fw-head, html:not([data-fw]) .panel { zoom: 1; }
+  html:not([data-fw]) .fw { height: auto; min-height: 100svh; }
+  html:not([data-fw]) .fw-head { padding-top: clamp(80px, 10svh, 100px); padding-bottom: var(--head-gap, clamp(48px, 5.5vw, 80px)); } /* a tighter top: just clear of the site header */
+  html:not([data-fw]) .fw-stage {
+    --slot-w: min(36vw, 64svh);
+    --acc-lift: clamp(60px, 8.5svh, 90px); /* how far the bottom card sits up; the stage gives the same back at its foot */
+    margin-bottom: calc(-1 * var(--acc-lift));
+    flex: none;
+    height: max(720px, min(96svh, 1000px)); /* room for the stacked bottom card too */
+  }
+  /* the ring a little higher, nearer the heading: its slot gives up some height at the foot
+   * (the ring is centred in it, so it rises by half of that) */
+  html:not([data-fw]) .fw-slot { margin-bottom: clamp(56px, 8svh, 96px); }
+  html:not([data-fw]) .panel-items > span { white-space: nowrap; }
+  /* the side cards share their column's width, so each pair matches */
+  html:not([data-fw]) .panel[data-k="validate"], html:not([data-fw]) .panel[data-k="run"],
+  html:not([data-fw]) .panel[data-k="build"], html:not([data-fw]) .panel[data-k="enable"] { width: min(100%, 340px); max-width: none; }
+  /* the bottom card laid out as the other four (icon and title on top, the points below,
+   * then View details) instead of the wide two-column version, and as wide as they are */
+  html:not([data-fw]) .panel[data-k="accelerate"] { display: flex; width: min(100%, 340px); top: calc(-1 * var(--acc-lift)); } /* up, ~40px under the ring; shifted, so the ring's rows don't change */
+  html:not([data-fw]) .panel[data-k="accelerate"] .panel-items,
+  html:not([data-fw]) .panel[data-k="accelerate"] .panel-more { grid-column: auto; grid-row: auto; align-self: auto; }
+}
+
 /* ── Tablet / phone ───────────────────────────────────────── */
 
 @media (max-width: 820px) {
@@ -782,15 +811,14 @@ html.sq-text .fw.head-waits .fw-head [data-sq-split]:not(.is-sq-in) .sq-wi { opa
 }
 .fw.is-assembling.is-ready .panel.is-in { opacity: 1; translate: 0 0; }
 
-/* After the first landing (TileFlight adds .was-built) nothing replays: scrolling back up,
- * the header and the cards hold for a while, then fade with the scroll and come back the
- * same way — TileFlight sets their opacity frame by frame, as the Talk band does (no CSS
- * transitions on it). Here: nothing hides them while the ring is in flight. */
+/* After the first landing (TileFlight adds .was-built) nothing replays and nothing fades:
+ * the header, the cards, the connectors and the ring's labels stay as they are while the
+ * ring takes off and lands again (the arrival rules above would otherwise hide them). */
 .fw.was-built.is-flight .fw-link-draw { stroke-dashoffset: 0; }
 .fw.was-built.is-flight .fw-dot { opacity: 1; }
-/* the cards themselves (their row is display: contents, so it can't fade as one) */
+.fw.was-built.is-flight :is(.ring-label, .fw-core) { opacity: 1; }
 .fw.was-built.is-flight.is-ready :is(.panel, .fw-chip) { opacity: 1; translate: 0 0; transition: transform 0.4s var(--ease-out), background-color 0.25s var(--ease-out), border-color 0.25s var(--ease-out), box-shadow 0.4s var(--ease-out); }
-.fw.was-built.is-flight.is-ready .fw-li { opacity: 1; translate: 0 0; } /* the list fades as one (.fw-list-wrap) */
+.fw.was-built.is-flight.is-ready .fw-li { opacity: 1; translate: 0 0; }
 
 /* ── Version 2: chips around the ring, cards in a row below (review button, lib/variants.ts) ───────
  * html[data-fw="2"]. The header and cards stay at full size (no 80% zoom); each stage

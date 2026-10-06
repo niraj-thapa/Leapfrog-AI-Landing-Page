@@ -138,6 +138,8 @@ type Tile =
   | { kind: 'stat'; value: string; label: string }
   | { kind: 'badge'; art: 'aws' | 'anthropic' }
   | { kind: 'competency'; src: string } // an AWS Partner competency badge (Figma "Partners", dark ink)
+  | { kind: 'service'; name: string | string[]; label: string } // a service we're recognised for: its name and a label
+  | { kind: 'chip'; src: string } // a square partner chip with its own card, centred on a square tile
   | { kind: 'ring' }
   | { kind: 'video' };
 
@@ -150,22 +152,22 @@ const A = -28.6, B = -15, C = 19, D = 32.6; // Square's grid, rows 2–3 opened 
 const TILES: Array<{ t: Tile; d: [number, number]; m: [number, number] | null }> = [
   { t: { kind: 'stage', k: 'validate', label: 'Validate' }, d: [-32.85, A], m: [-16, -40] },
   { t: { kind: 'stat', value: '500+', label: 'AI-accelerated experts' }, d: [-10.97, A], m: null },
-  { t: { kind: 'competency', src: '/assets/partners/aws-ai-ink.svg' }, d: [10.97, A], m: null },
-  { t: { kind: 'stage', k: 'build', label: 'Build' }, d: [32.85, A], m: [16, -40] },
+  { t: { kind: 'stage', k: 'build', label: 'Build' }, d: [10.97, A], m: [16, -40] },
+  { t: { kind: 'competency', src: '/assets/partners/aws-healthcare-ink.svg' }, d: [32.85, A], m: null }, // swapped with Build, Oct 6
 
-  { t: { kind: 'photo', src: '/assets/support-team.jpg', pos: '30% 50%' }, d: [-43.8, B], m: [-32, -26] },
-  { t: { kind: 'stat', value: '100+', label: 'AI initiatives' }, d: [-21.9, B], m: [0, -26] },
+  { t: { kind: 'stat', value: '100+', label: 'AI initiatives led' }, d: [-43.8, B], m: [0, -26] },
+  { t: { kind: 'chip', src: '/assets/partners/claude-select-chip.svg' }, d: [-21.9, B], m: [-32, -26] }, // Claude Partner Network, Select Services Partner (Figma 538:3101); swapped with 100+, Oct 6
   { t: { kind: 'ring' }, d: [0, B], m: [32, 27] }, // the Flywheel ring, top centre (swapped with the portrait, Oct 4)
-  { t: { kind: 'stage', k: 'enable', label: 'Enable' }, d: [21.9, B], m: [32, -26] },
-  { t: { kind: 'badge', art: 'aws' }, d: [43.8, B], m: null },
+  { t: { kind: 'stat', value: '150+', label: 'Person AI CoE' }, d: [21.9, B], m: null },
+  { t: { kind: 'stage', k: 'enable', label: 'Enable' }, d: [43.8, B], m: [32, -26] }, // swapped with 150+, Oct 6
 
   { t: { kind: 'stage', k: 'run', label: 'Run' }, d: [-43.8, C], m: null },
-  { t: { kind: 'competency', src: '/assets/partners/aws-healthcare-ink.svg' }, d: [-21.9, C], m: [-32, 27] },
+  { t: { kind: 'competency', src: '/assets/partners/aws-ai-ink.svg' }, d: [-21.9, C], m: [-32, 27] }, // AWS AI Services Competency
   { t: { kind: 'video' }, d: [0, C], m: [0, 27] },
-  { t: { kind: 'photo', src: '/assets/story-portrait.png', pos: '50% 22%' }, d: [21.9, C], m: null },
-  { t: { kind: 'stat', value: '150+', label: 'AI Center of Excellence' }, d: [43.8, C], m: null },
+  { t: { kind: 'service', name: 'Agentic AI', label: 'Consulting services' }, d: [21.9, C], m: null }, // the AI Services competency's two services, as tiles
+  { t: { kind: 'service', name: 'Generative AI', label: 'Consulting services' }, d: [43.8, C], m: null },
 
-  { t: { kind: 'badge', art: 'anthropic' }, d: [-32.85, D], m: null },
+  { t: { kind: 'photo', src: '/assets/support-team.jpg', pos: '30% 50%' }, d: [-32.85, D], m: null }, // the team photo (Oct 6, back from row 2)
   { t: { kind: 'stage', k: 'accelerate', label: 'Accelerate' }, d: [-10.97, D], m: [-16, 41] },
   { t: { kind: 'stat', value: '250+', label: 'Products' }, d: [10.97, D], m: null },
   { t: { kind: 'competency', src: '/assets/partners/aws-devops-ink.svg' }, d: [32.85, D], m: [16, 41] },
@@ -192,6 +194,21 @@ function TileBody({ t }: { t: Tile }) {
         </>
       );
     case 'competency':
+      return <img src={t.src} alt="" />;
+    case 'service':
+      return (
+        <>
+          {/* one service, or several — each its name over the label, divided by a hairline */}
+          {(Array.isArray(t.name) ? t.name : [t.name]).map((n, i) => (
+            <span key={n} className="svc">
+              {i > 0 && <i className="svc-rule" aria-hidden />}
+              <strong>{n}</strong>
+              <span>{t.label}</span>
+            </span>
+          ))}
+        </>
+      );
+    case 'chip':
       return <img src={t.src} alt="" />;
     case 'badge':
       return t.art === 'aws' ? <img src="/assets/badge-aws.svg" alt="" width={47} height={28} /> : <AnthropicMark />;
@@ -230,6 +247,7 @@ const driftFor = (_t: Tile, dx: number, dy: number) => {
 const MORPH = 0.33; // the move completes here…
 const HERO_DARK_UNTIL = 0.3; // morph progress at which the shrinking video clears the header
 const DOCK = 0.38; // …and the glide settles here, so the move ends crisply instead of easing to a stop
+export const HOLD = 0.25; // once docked, the tiles hold still for this much of a viewport before they move on (globals.css .hero height includes it)
 const SMOOTH = 0.085;
 const WORD_SMOOTH = 0.13;
 /* Headline fade, fitted to squareup.com's TextStack title (sampled per frame
@@ -360,8 +378,9 @@ export default function Hero() {
         pin.style.setProperty('--say', span(m, 0.6, 0.95).toFixed(4));
         tiles.forEach((t) => t.style.setProperty('--py', '0px'));
       } else {
-        /* depth parallax once docked: every tile drifts up at its own rate */
-        const par = Math.max(0, px - H * DOCK);
+        /* depth parallax once docked — after a hold (HOLD of a viewport) where the docked
+         * tiles stay still — every tile drifts up at its own rate */
+        const par = Math.max(0, px - H * (DOCK + HOLD));
         const pyVideo = -par * driftFor(TILES[videoIndex].t, TILES[videoIndex].d[0], TILES[videoIndex].d[1]);
         tiles.forEach((t, i) => t.style.setProperty('--py', `${(-par * driftFor(TILES[i].t, TILES[i].d[0], TILES[i].d[1])).toFixed(1)}px`));
         pin.style.setProperty('--py-video', `${pyVideo.toFixed(1)}px`);

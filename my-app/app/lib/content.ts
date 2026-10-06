@@ -42,10 +42,10 @@ export const BADGES: Array<{
   href: string;
   src: string;
   mono: string; // flat white, for the hero marquee (as squareup.com's logo row)
-  kind: 'square' | 'wide' | 'seal';
+  kind: 'square' | 'wide' | 'seal' | 'lockup';
 }> = [
   { name: 'AWS Partner · AI Services Competency', href: '/partners/aws', src: '/assets/partners/aws-ai.svg', mono: '/assets/partners/aws-ai-mono.svg', kind: 'square' },
-  { name: 'Claude Partner Network', href: '/partners/anthropic', src: '/assets/partners/claude-partner.svg', mono: '/assets/partners/claude-partner-mono.svg', kind: 'wide' },
+  { name: 'Claude Partner Network: Select Services Partner', href: '/partners/anthropic', src: '/assets/partners/claude-select-chip.svg', mono: '/assets/partners/claude-select-mono.svg', kind: 'lockup' }, // Figma 538:3101 (Oct 6; was the wide Claude Partner Network wordmark)
   { name: 'AWS Partner · Healthcare Services Competency', href: '/partners/aws', src: '/assets/partners/aws-healthcare.svg', mono: '/assets/partners/aws-healthcare-mono.svg', kind: 'square' },
   { name: 'SOC 2 Type II', href: '/security', src: '/assets/partners/soc2.svg', mono: '/assets/partners/soc2-mono.svg', kind: 'seal' },
   { name: 'AWS Partner · DevOps Services Competency', href: '/partners/aws', src: '/assets/partners/aws-devops.svg', mono: '/assets/partners/aws-devops-mono.svg', kind: 'square' },
@@ -145,7 +145,7 @@ export const METRICS = [
     value: '8–30×',
     image: '/assets/results/roi-team.jpg',
     label: 'Client ROI',
-    industry: 'Across industries',
+    industry: 'Education',
     did: 'We agreed the success metric up front and measured against it.',
     service: 'AI Solutions',
     serviceHref: '/solutions',
@@ -182,7 +182,8 @@ export const METRICS = [
   },
 ];
 
-export const RESULTS_LEAD = 'AI where the stakes are high: HIPAA, data privacy and security built in.';
+export const RESULTS_LEAD =
+  'Real results where the bar is highest. Faster cycle times, better customer experiences and teams freed for higher-value work, with security and compliance (HIPAA, PCI DSS, GDPR and more) handled from day one as table stakes.';
 
 /* Featured story — five beats, UNVERIFIED (Figma figures; brackets are open). */
 export const STORY = {
@@ -206,6 +207,65 @@ export const STORY = {
     { k: 'Next', v: 'The next phase', next: true },
   ],
 };
+
+/* Client results V2 (html[data-results="2"]): client stories as tabs (Figma "Tab Container",
+ * LF AI Landing Page node 2111:132). SecondLook's story is from the Figma; laudio's and
+ * Signetic's are PLACEHOLDERS — quotes, people, facts and photos to come. */
+export const CLIENT_STORIES = [
+  {
+    client: 'SecondLook Health',
+    logo: '/assets/clients/secondlook.svg',
+    logoW: 193,
+    photo: '/assets/story-portrait.png',
+    photoPos: '50% 30%',
+    person: 'Sierra Manker',
+    role: 'Cofounder & Head of Product, SecondLook Health',
+    /* the Figma's quote carries placeholder text; this is the quote already approved for the page (UNVERIFIED) */
+    quote:
+      'Leapfrog is a true collaborator. They helped shape SecondLook’s brand from concept to execution across our visual branding, app and website, with exceptional quality and attention to detail.',
+    facts: [
+      { k: 'Live in', v: '9 weeks' },
+      { k: 'Scope', v: 'Clinical record review workflow' },
+      { k: 'Integration', v: 'Integrated with the existing EHR and review queue' },
+      { k: 'Measured result', v: 'Review time down 70–90% with clinician sign-off retained' },
+    ],
+    href: '/case-studies/secondlook-health',
+  },
+  {
+    client: 'Laudio',
+    logo: '/assets/clients/laudio.svg',
+    logoW: 83,
+    photo: '/assets/results/roi-team.jpg',
+    photoPos: '50% 40%',
+    person: '[Client name]',
+    role: '[Role], Laudio',
+    quote: '[Client quote to come: what changed for the team, in their words.]',
+    facts: [
+      { k: 'Live in', v: '[Weeks]' },
+      { k: 'Scope', v: '[What went live]' },
+      { k: 'Integration', v: '[Systems it works with]' },
+      { k: 'Measured result', v: '[The agreed metric and how it moved]' },
+    ],
+    href: '/case-studies',
+  },
+  {
+    client: 'Signetic',
+    logo: '/assets/clients/signetic.svg',
+    logoW: 92,
+    photo: '/assets/results/finance-documents.jpg',
+    photoPos: '50% 50%',
+    person: '[Client name]',
+    role: '[Role], Signetic',
+    quote: '[Client quote to come: what changed for the team, in their words.]',
+    facts: [
+      { k: 'Live in', v: '[Weeks]' },
+      { k: 'Scope', v: '[What went live]' },
+      { k: 'Integration', v: '[Systems it works with]' },
+      { k: 'Measured result', v: '[The agreed metric and how it moved]' },
+    ],
+    href: '/case-studies',
+  },
+];
 
 /* ── 5 Start focused. Build for the long run. ────────────────────────────── */
 export const ROADMAP = {

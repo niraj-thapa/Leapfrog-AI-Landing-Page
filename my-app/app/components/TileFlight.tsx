@@ -41,6 +41,7 @@ const FLIGHT_START = 1.1;
  * docked statement going down, below the landed Flywheel going up), stop anywhere
  * between them and the page glides on — to the Flywheel, or back to the statement — only ever after the visitor's own scrolling, never a link glide. */
 const HERO_DOCK = 0.38; // Hero.tsx DOCK
+const HERO_HOLD = 0.25; // Hero.tsx HOLD: the docked tiles hold still this long before moving on
 const SNAP_IDLE = 260;
 /* free scroll through the tile parallax first: the snap only takes over once the visitor
  * is this far (in viewports) past the statement */
@@ -51,9 +52,6 @@ const span = (p: number, a: number, b: number) => clamp01((p - a) / (b - a));
 /* leaves the tile at once (the tile keeps rising with its row) and eases into place */
 const launch = (v: number) => 1 - Math.pow(1 - v, 2.4);
 const STEP_MS = 420; // between stages as the Flywheel assembles
-/* scrolling back up after the first landing: the header and cards stay through the snap's
- * free stretch, then fade over this much of the flight (p) */
-const FADE_SPAN = 0.22;
 const DRAW_MS = 650; // a connector drawing out from the ring
 
 export default function TileFlight() {
@@ -71,8 +69,8 @@ export default function TileFlight() {
     /* the header waits for the ring: hidden through the flight, then revealed the way
      * Square reveals its headings (word by word from behind a clip) once the ring has
      * landed — title first, then the two lines under it (the promise line sits above the
-     * list in versions 4–5). This plays once: after the first landing, taking off fades the
-     * header and the cards out and landing fades them back in (.was-built, flywheel.css) */
+     * list in versions 4–5). This plays once: after the first landing everything stays put
+     * as the ring takes off and lands again (.was-built, flywheel.css) */
     const heads = Array.from(fw.querySelectorAll<HTMLElement>('.fw-title, .fw-pain, .fw-promise'));
     heads.forEach((h, j) => {
       splitWords(h);
@@ -104,42 +102,6 @@ export default function TileFlight() {
     let idle = 0;
     let landed: boolean | null = null;
     let built = false; // the header and cards have played their entrance once
-
-    /* the fade after the first landing, as the Talk band's (TalkBand.tsx): no CSS
-     * transitions — a smoothed copy of the scroll-driven value eases toward it every frame
-     * (12% a frame), and the header, the list and the cards take their opacity straight from
-     * it; the header and the list also drift 24px down as they go and back up as they return.
-     * Fully in, the inline styles are cleared so the section's own styles take over. */
-    let fadeTarget = 1, fadeShown = 1, fadeRaf = 0, fadeLast = 0;
-    const blocks = () => Array.from(fw.querySelectorAll<HTMLElement>('.fw-head, .fw-list-wrap'));
-    const items = () => Array.from(fw.querySelectorAll<HTMLElement>('.panel, .fw-chip, .fw-links'));
-    const paintFade = (v: number) => {
-      const full = v > 0.999;
-      blocks().forEach((el) => {
-        el.style.opacity = full ? '' : v.toFixed(3);
-        el.style.translate = full ? '' : `0 ${(24 * (1 - v)).toFixed(2)}px`;
-      });
-      items().forEach((el) => (el.style.opacity = full ? '' : v.toFixed(3)));
-    };
-    const fadeTick = (now: number) => {
-      fadeRaf = 0;
-      const dt = fadeLast ? Math.min(64, now - fadeLast) : 16.7;
-      fadeLast = now;
-      fadeShown += (fadeTarget - fadeShown) * (1 - Math.pow(1 - 0.12, dt / 16.7));
-      if (Math.abs(fadeTarget - fadeShown) < 0.002) fadeShown = fadeTarget;
-      paintFade(fadeShown);
-      if (fadeShown !== fadeTarget) fadeRaf = requestAnimationFrame(fadeTick);
-      else fadeLast = 0;
-    };
-    const fadeTo = (v: number, now = false) => {
-      fadeTarget = v;
-      if (now) {
-        fadeShown = v;
-        paintFade(v);
-        return;
-      }
-      if (!fadeRaf && fadeShown !== fadeTarget) fadeRaf = requestAnimationFrame(fadeTick);
-    };
     let timers: number[] = [];
 
     /* once the ring has landed: each connector draws out from its ring dot, then its card
@@ -200,7 +162,12 @@ export default function TileFlight() {
       /* the flight lands where an anchor jump to #flywheel leaves the section — flush with
        * the top of the screen — so every way in ends assembled */
       const landTop = landLine();
-      const startTop = H * FLIGHT_START;
+      /* the flight starts just before the Flywheel's top enters the screen — but never before
+       * the visitor scrolls on past the docked tiles' hold (HERO_DOCK + HERO_HOLD): until then the
+       * ring stays in its tile, however close the Flywheel follows the hero */
+      const heroEl = document.getElementById('top');
+      const dockY = heroEl ? window.scrollY + heroEl.getBoundingClientRect().top + (HERO_DOCK + HERO_HOLD) * H : -Infinity;
+      const startTop = Math.min(H * FLIGHT_START, window.scrollY + fr.top - dockY - 24);
       /* within a pixel of the line counts as landed (a glide's last step can leave a
        * sub-pixel remainder that the browser rounds away) */
       const p = fr.top - landTop < 1 ? 1 : clamp01((startTop - fr.top) / Math.max(1, startTop - landTop));
@@ -226,17 +193,6 @@ export default function TileFlight() {
       fly.style.display = flying && !live ? 'block' : 'none';
       fwFlight.calm = following ? 1 : flying ? 1 - launch(p) : 0;
 
-      /* after the first landing the header and cards don't vanish as the ring takes off:
-       * they hold while the visitor scrolls back up a little, then fade with the scroll
-       * (eased) — gone by the time the section is half a screen down, back in reverse */
-      if (built) {
-        /* fully there through the free half-screen the snap leaves to the visitor (where a
-         * stop glides the page back to the Flywheel), fading only beyond it — as the snap
-         * carries the page away — and returning there as it carries the page in */
-        const hold = 1 - (FREE_SCROLL * H) / Math.max(1, startTop - landTop);
-        const t = span(p, hold - FADE_SPAN, hold);
-        fadeTo(t * t * (3 - 2 * t));
-      }
 
       /* landing / taking off again */
       const nowLanded = p >= 1;
@@ -248,12 +204,11 @@ export default function TileFlight() {
           else if (!nowLanded) resetAssembly();
           if (nowLanded) {
             built = true;
-            fadeTo(1, true);
             fw.classList.add('was-built');
           }
         }
-        /* after that, nothing replays: .was-built.is-flight fades the header and cards out
-         * as the ring takes off, and they fade back in as it lands (flywheel.css) */
+        /* after that, nothing replays or fades: the header, cards and ring labels simply stay
+         * (.was-built in flywheel.css) as the ring takes off and lands again */
         landed = nowLanded;
       }
 
@@ -371,8 +326,6 @@ export default function TileFlight() {
     window.addEventListener('resize', kick);
     return () => {
       cancelAnimationFrame(raf);
-      cancelAnimationFrame(fadeRaf);
-      paintFade(1);
       window.clearInterval(readyPoll);
       window.clearTimeout(snapIdle);
       window.removeEventListener('scroll', onScroll);

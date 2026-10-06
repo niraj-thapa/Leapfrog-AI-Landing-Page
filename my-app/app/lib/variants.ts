@@ -15,7 +15,8 @@ export type VariantGroup = {
   label: string; // the section's name in the switcher
   target?: string; // the section's id: picking a version scrolls there (none: stay put)
   targetOffset?: number; // …this many viewport heights further in (a pinned section's revealed point)
-  options: VariantOption[]; // the first is the default
+  options: VariantOption[]; // the first is the baseline (no html attribute)
+  default?: string; // the version shown until the visitor picks one (else the first)
   legacy?: string; // an older localStorage key to carry over
 };
 
@@ -46,9 +47,20 @@ export const VARIANT_GROUPS: VariantGroup[] = [
     key: 'why',
     label: 'Measured by your outcomes',
     target: 'why',
+    default: '2', // chosen Oct 6
     options: [
       { value: '1', note: 'Pillar explorer, picture panel' },
-      { value: '2', note: 'Scroll story, sticky index and panel' },
+      { value: '2', note: 'Scroll story, sticky picture panel' },
+    ],
+  },
+  {
+    key: 'results',
+    label: 'Client results delivered',
+    target: 'results',
+    default: '2', // chosen Oct 6
+    options: [
+      { value: '1', note: 'Photo panels and featured story' },
+      { value: '2', note: 'Client stories as tabs' },
     ],
   },
   {
@@ -58,6 +70,15 @@ export const VARIANT_GROUPS: VariantGroup[] = [
     options: [
       { value: '1', note: 'Four stage cards' },
       { value: '2', note: 'Tabbed photo panel' },
+    ],
+  },
+  {
+    key: 'faq',
+    label: 'Straight answers',
+    target: 'answers',
+    options: [
+      { value: '1', note: 'Heading beside the list' },
+      { value: '2', note: 'Heading on top, cards in two columns' },
     ],
   },
   {
@@ -73,10 +94,14 @@ export const VARIANT_GROUPS: VariantGroup[] = [
   },
 ];
 
-export const variantStorageKey = (key: string) => `variant:${key}`;
+/* the storage key carries a set number: bumping it (Oct 6, the chosen line-up) drops earlier
+ * choices, so every browser starts from the defaults above */
+const SET = '2';
+export const variantStorageKey = (key: string) => `variant${SET}:${key}`;
+export const defaultValue = (g: VariantGroup) => g.default ?? g.options[0].value;
 
 /** The pre-paint script for <head>: applies the stored or linked versions to <html>. */
 export function variantScript() {
-  const groups = VARIANT_GROUPS.map((g) => ({ k: g.key, o: g.options.map((o) => o.value), l: g.legacy || '' }));
-  return `try{var G=${JSON.stringify(groups)},q=new URLSearchParams(location.search),s=localStorage;G.forEach(function(g){var v=q.get(g.k),sk='variant:'+g.k;if(v&&g.o.indexOf(v)>-1)s.setItem(sk,v);else v=s.getItem(sk)||(g.l&&s.getItem(g.l));if(v&&v!==g.o[0]&&g.o.indexOf(v)>-1)document.documentElement.dataset[g.k]=v})}catch(e){}`;
+  const groups = VARIANT_GROUPS.map((g) => ({ k: g.key, o: g.options.map((o) => o.value), d: defaultValue(g) }));
+  return `try{var G=${JSON.stringify(groups)},q=new URLSearchParams(location.search),s=localStorage;G.forEach(function(g){var v=q.get(g.k),sk='variant${SET}:'+g.k;if(v&&g.o.indexOf(v)>-1)s.setItem(sk,v);else v=s.getItem(sk);if(!v||g.o.indexOf(v)<0)v=g.d;if(v!==g.o[0])document.documentElement.dataset[g.k]=v})}catch(e){}`;
 }

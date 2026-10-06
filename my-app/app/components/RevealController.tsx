@@ -10,11 +10,27 @@ import { splitWords } from '../lib/sqText';
  *
  * Under reduced motion the lift is zeroed in CSS (--rise-lift) so only the
  * opacity change remains. */
-const TARGETS = ['[data-reveal] > *', '.metrics > *', '.stage-grid > *', '.pillars > *', '.results-grid > *'];
+const TARGETS = [
+  '[data-reveal] > *',
+  '.metrics > *',
+  '.stage-grid > *',
+  '.pillars > *',
+  '.results-grid > *',
+  /* every group arrives item by item, as the Start focused cards do (Oct 6) */
+  '.insight-grid > *',
+  '.faq-list > *',
+  '.support-list > *',
+  '.why-list > *',
+  '.why-story-step > *',
+  '.why-story-visual',
+  '.cs-tabs > *',
+  '.cs-card',
+  '.compliance > *',
+];
 
 /* Grids whose children stagger individually: animating the grid as well would
  * fade everything twice. */
-const CONTAINERS = ['.metrics', '.stage-grid', '.pillars', '.results-grid'];
+const CONTAINERS = ['.metrics', '.stage-grid', '.pillars', '.results-grid', '.insight-grid', '.faq-list', '.support-list', '.why-list', '.cs-tabs', '.compliance'];
 
 /* Section text, after squareup.com (measured Oct 3 2026, 1440×900):
  *  - headings ("split-text-clip-rise"): split into words; each word starts 100px low
@@ -88,7 +104,7 @@ export default function RevealController() {
     document.querySelectorAll<HTMLElement>('[data-rise-mount]').forEach((el, i) => {
       el.setAttribute('data-rise', '');
       el.style.setProperty('--rise-delay', `${i * 90}ms`);
-      requestAnimationFrame(() => el.classList.add('is-risen'));
+      requestAnimationFrame(() => el.setAttribute('data-risen', ''));
     });
 
     const inset = Math.round(window.innerHeight * 0.1);
@@ -98,7 +114,9 @@ export default function RevealController() {
           if (!e.isIntersecting) return;
           const el = e.target as HTMLElement;
           el.style.setProperty('--rise-delay', `${(order.get(el) ?? 0) * 60}ms`);
-          el.classList.add('is-risen');
+          /* an attribute, not a class: React re-renders an element's className (an FAQ
+           * item opening, a tab turning active) and would wipe a class it didn't set */
+          el.setAttribute('data-risen', '');
           io.unobserve(el);
         });
       },

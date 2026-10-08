@@ -2001,7 +2001,7 @@ html.ring-live .tile-fly .ring-glass {
 .why-tab h3 {
   font-size: clamp(22px, 1.95vw, 28px); /* concourse.ai list titles: 28px */
   line-height: 1.15;
-  font-weight: 500;
+  font-weight: 600; /* bold, as the section headings (Oct 8; was 500) */
   letter-spacing: -0.01em;
   color: var(--fg);
   transition: opacity 0.25s var(--ease-out);
@@ -2793,7 +2793,7 @@ html[data-why="2"] .why-v2 {
 .why-story-step h3 {
   font-size: clamp(30px, 2.8vw, 40px);
   line-height: 1.1;
-  font-weight: 500;
+  font-weight: 600; /* bold, as the section headings (Oct 8; was 500) */
   letter-spacing: -0.03em;
   color: var(--fg);
   text-wrap: balance;

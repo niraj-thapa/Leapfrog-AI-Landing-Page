@@ -209,15 +209,16 @@ export const STORY = {
 };
 
 /* Client results V2 (html[data-results="2"]): client stories as tabs (Figma "Tab Container",
- * LF AI Landing Page node 2111:132). SecondLook's story is from the Figma; laudio's and
- * Signetic's are PLACEHOLDERS — quotes, people, facts and photos to come. */
+ * LF AI Landing Page node 2111:132). SecondLook's story is from the Figma; Phil's and
+ * Signetic's people, quotes and portraits are supplied (Oct 8); their facts are still
+ * PLACEHOLDERS. */
 export const CLIENT_STORIES = [
   {
     client: 'SecondLook Health',
     logo: '/assets/clients/secondlook.svg',
     logoW: 193,
     photo: '/assets/story-portrait.png',
-    photoPos: '50% 30%',
+    photoPos: '50% 60%', // Oct 8: higher in the card
     person: 'Sierra Manker',
     role: 'Cofounder & Head of Product, SecondLook Health',
     /* the Figma's quote carries placeholder text; this is the quote already approved for the page (UNVERIFIED) */
@@ -232,14 +233,14 @@ export const CLIENT_STORIES = [
     href: '/case-studies/secondlook-health',
   },
   {
-    client: 'Laudio',
-    logo: '/assets/clients/laudio.svg',
-    logoW: 83,
-    photo: '/assets/results/roi-team.jpg',
-    photoPos: '50% 40%',
-    person: '[Client name]',
-    role: '[Role], Laudio',
-    quote: '[Client quote to come: what changed for the team, in their words.]',
+    client: 'Phil',
+    logo: '/assets/clients/phil.svg',
+    logoW: 76, // 120×37 artwork: about the cap height of the other two logos
+    photo: '/assets/story-phil.jpg', // the client's portrait (Oct 8)
+    photoPos: '50% 30%',
+    person: 'Puran Singh',
+    role: 'Co-Founder/VP, Engineering, Phil',
+    quote: 'Leapfrog truly understands the PHIL brand. Their work feels very thoughtful, cohesive, and never templated. Feedback is translated into strong revisions quickly, making collaboration seamless. Even with AI accelerating the process, the final work still feels intentional and tailored—while saving us both time and cost.',
     facts: [
       { k: 'Live in', v: '[Weeks]' },
       { k: 'Scope', v: '[What went live]' },
@@ -252,11 +253,11 @@ export const CLIENT_STORIES = [
     client: 'Signetic',
     logo: '/assets/clients/signetic.svg',
     logoW: 92,
-    photo: '/assets/results/finance-documents.jpg',
-    photoPos: '50% 50%',
-    person: '[Client name]',
-    role: '[Role], Signetic',
-    quote: '[Client quote to come: what changed for the team, in their words.]',
+    photo: '/assets/story-signetic.jpg', // the client's portrait (Oct 8)
+    photoPos: '50% 30%',
+    person: 'Pamela Kott',
+    role: 'VP, Customer Engagements, Signetic',
+    quote: 'Working with Leapfrog on Signetic was a highly collaborative experience. They expertly translated complex healthcare workflows into clean, approachable designs while remaining incredibly responsive. Through smart use of AI and intentional design, they delivered a platform our pharmacy clients regularly praise for its usability, visual clarity, and overall user experience.',
     facts: [
       { k: 'Live in', v: '[Weeks]' },
       { k: 'Scope', v: '[What went live]' },

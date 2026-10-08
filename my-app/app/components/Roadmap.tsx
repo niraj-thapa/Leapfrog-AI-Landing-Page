@@ -1,5 +1,6 @@
 import { CONTACT_HREF, ROADMAP } from '../lib/content';
 import StageTabs from './StageTabs';
+import Arrow from './Arrow';
 
 /* Module 5 — the stage cards reuse the Figma "From early validation to delivery"
  * card grid (node 2050:4954); the working models reuse the Figma "Choose the
@@ -51,7 +52,7 @@ export default function Roadmap() {
                     <h4>{m.title}</h4>
                     <p>{m.body}</p>
                     <a href={`${CONTACT_HREF}?model=${m.key}`} className="link-arrow support-link">
-                      Talk to our team <span aria-hidden>→</span>
+                      Talk to our team <Arrow />
                     </a>
                   </div>
                 </li>

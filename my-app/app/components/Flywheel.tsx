@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { initFlywheel } from './flywheel/flywheel';
 import './flywheel/flywheel.css';
+import Arrow from './Arrow';
 
 /* The AI Flywheel (brief v8, module 2) — the "glass pipe" build.
  *
@@ -254,7 +255,7 @@ function StageList() {
                     <strong>{p.title}.</strong> {p.lead}
                   </p>
                   <a href={p.href} className="fw-li-more" data-open={p.k} tabIndex={isOpen ? 0 : -1}>
-                    View details <span aria-hidden="true">→</span>
+                    View details <Arrow />
                   </a>
                 </div>
               </div>
@@ -303,6 +304,8 @@ export default function Flywheel() {
     <>
       <section className="fw" id="flywheel" aria-labelledby="fw-title" data-theme={dark ? 'dark' : 'light'}>
         <canvas className="fw-gl" id="fw-gl" aria-hidden="true" />
+        {/* the ring's backdrop while it flies in or out (a copy of the ring canvas, flywheel.js) */}
+        <canvas className="fw-gl-back" id="fw-gl-back" aria-hidden="true" />
         <svg className="fw-links" id="fw-links" aria-hidden="true" />
         <p className="fw-sr">{WHEEL_ALT}</p>
 
@@ -377,7 +380,7 @@ export default function Flywheel() {
                 <span className="panel-more">
                   <span className="panel-more-lbl">View details</span>
                   <span className="panel-more-lbl panel-more-opening" aria-hidden="true">Opening</span>
-                  <span className="arr" aria-hidden="true">→</span>
+                  <Arrow className="arr" />
                   {/* version 6: while the pointer rests on the card, this ring fills and the
                       bar runs along the card's foot, then the details open (flywheel.js) */}
                   <svg className="panel-ring" viewBox="0 0 16 16" aria-hidden="true">
@@ -402,7 +405,6 @@ export default function Flywheel() {
 
       <div className="fw-modal" id="fw-modal" hidden>
         <div className="fw-dialog" id="fw-dialog" role="dialog" aria-modal="true" aria-labelledby="d-headline">
-          <span className="sweep" aria-hidden="true" />
           <button type="button" className="btn-glass d-close" id="d-close" aria-label="Close">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
@@ -420,12 +422,12 @@ export default function Flywheel() {
           </div>
           <div className="d-cta-row">
             <a className="d-cta" id="d-link" href="#">
-              <span id="d-cta" /> <span aria-hidden="true">→</span>
+              <span id="d-cta" /> <Arrow />
             </a>
           </div>
           <nav className="d-nav" aria-label="Flywheel stages">
-            <button type="button" className="btn-glass" id="d-prev"><span className="btn-ic" aria-hidden="true">←</span><span id="d-prev-l" /></button>
-            <button type="button" className="btn-glass" id="d-next"><span id="d-next-l" /><span className="btn-ic" aria-hidden="true">→</span></button>
+            <button type="button" className="btn-glass" id="d-prev"><Arrow dir="left" className="btn-ic" /><span id="d-prev-l" /></button>
+            <button type="button" className="btn-glass" id="d-next"><span id="d-next-l" /><Arrow className="btn-ic" /></button>
           </nav>
         </div>
       </div>

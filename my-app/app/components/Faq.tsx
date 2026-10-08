@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FAQS } from '../lib/content';
+import Arrow from './Arrow';
 
 /* Straight answers — Figma node 2050:5450. Heading left (with Expand all / Collapse
  * all under it), stacked white cards right, the first open.
@@ -61,7 +62,7 @@ export default function Faq() {
                       <p>{f.a}</p>
                       {f.link && (
                         <a href={f.link.href} className="link-arrow">
-                          {f.link.label} <span aria-hidden>→</span>
+                          {f.link.label} <Arrow />
                         </a>
                       )}
                     </div>

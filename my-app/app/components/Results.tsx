@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import ClientStories from './ClientStories';
 import { METRICS, RESULTS_EYEBROW, RESULTS_HEADLINE, RESULTS_LEAD, STORY } from '../lib/content';
+import Arrow from './Arrow';
 
 /* Client results delivered — after squareup.com's "Keep your business growing"
  * (HomePageV3AudienceMoment, measured Oct 3 2026): a row of full-height photo panels.
@@ -150,7 +151,7 @@ export default function Results() {
                     </div>
                     <p className="growth-links">
                       <a href={m.href} tabIndex={open ? 0 : -1}>
-                        Case study <span aria-hidden>→</span>
+                        Case study <Arrow />
                       </a>
                     </p>
                   </div>

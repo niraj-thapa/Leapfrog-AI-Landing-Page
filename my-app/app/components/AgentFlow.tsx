@@ -20,16 +20,21 @@ const ICONS: Record<string, React.ReactNode> = {
   'Review agents': <><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></>,
   'Test agents': <><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3" /><path d="M7.5 14h9" /></>,
   'Security agents': <><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M9 12l2 2 4-4" /></>,
-  'Evaluation agents': <><path d="M4 18a8 8 0 1 1 16 0" /><path d="M12 18l4-6" /></>,
-  'Operations agents': <path d="M3 12h4l3-8 4 16 3-8h4" />,
+  // a half gauge, refined (Oct 8): a wider dial, three ticks, the needle to the high side and its pivot
+  'Evaluation agents': <><path d="M2.75 15.5a9.25 9.25 0 0 1 18.5 0" /><path d="M12 6.25v1.75M5.46 8.96l1.24 1.24M18.54 8.96l-1.24 1.24" /><path d="M12 15.5l4-4.75" /><circle cx="12" cy="15.5" r="1.5" /></>, // centred in the tile
+  'Operations agents': <><rect x="3.5" y="4" width="17" height="7" rx="2" /><rect x="3.5" y="13" width="17" height="7" rx="2" /><path d="M7.5 7.5h.01M7.5 16.5h.01M11 7.5h3M11 16.5h3" /></>, // servers with status lights: production watched (Oct 8; was a pulse line)
 };
 
 /* live today (the first, second and fourth agents) */
 const LIVE = new Set(['Review agents', 'Test agents', 'Evaluation agents']);
 
-const LINE_MS = 280; // the hairline draws …
-const CARD_MS = 680; // … then the card arrives
-const NEXT_MS = LINE_MS + 560; // the next line starts as this card is nearly sharp
+/* timed as concourse.ai's "Agents built to own the work" (its Lottie, measured Oct 8): each
+ * card comes in from a heavy blur to sharp, box and contents together, over 1s on
+ * cubic-bezier(0.5, 0, 0, 1) — it reads sharp in ~0.35s and settles — and the next starts
+ * 0.4s later; the hairline above a card draws just ahead of it */
+const LINE_MS = 180; // the hairline draws …
+const CARD_MS = 1000; // … as the card comes in (ag-in)
+const NEXT_MS = 400; // the next card starts
 
 const sentence = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -54,7 +59,7 @@ export default function AgentFlow({ open, visible }: { open: boolean; visible: b
             className="ag-card"
             style={{
               ['--line-at' as string]: `${at}ms`,
-              ['--card-at' as string]: `${i === 0 ? 0 : at + LINE_MS}ms`,
+              ['--card-at' as string]: `${i === 0 ? 0 : at + 80}ms`, // just after its line starts
               ['--line-ms' as string]: `${LINE_MS}ms`,
               ['--card-ms' as string]: `${CARD_MS}ms`,
             }}

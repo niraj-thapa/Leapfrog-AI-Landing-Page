@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CONTACT_HREF, CTA_LABEL, HERO } from '../lib/content';
 import { getLenis } from '../lib/smooth';
 import CredibilityMarquee, { AnthropicMark } from './Credibility';
+import Arrow from './Arrow';
 
 /* Two cuts of Animatics v1 (encoded from the 65 MB master, which lives outside
  * public/ in source-video/):
@@ -579,7 +580,7 @@ export default function Hero() {
               {CTA_LABEL}
             </a>
             <a href="#flywheel" className="btn-glass" tabIndex={docked ? 0 : -1}>
-              See how we work <span className="btn-ic" aria-hidden>↓</span>
+              See how we work <Arrow dir="down" className="btn-ic" />
             </a>
           </div>
         </div>

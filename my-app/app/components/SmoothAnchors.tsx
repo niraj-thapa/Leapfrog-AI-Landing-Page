@@ -5,8 +5,8 @@ import { glideTo } from '../lib/glide';
 
 /* In-page links (#flywheel, #work-together, …) glide to their section instead of
  * jumping: an eased scroll whose length grows with the distance, landing where the
- * browser would (clear of the header, scroll-padding-top). The hash is kept in the
- * address bar. Modified clicks (new tab etc.) are left alone. */
+ * browser would (clear of the header, scroll-padding-top). The address bar is left as it
+ * is — no #flywheel added (Oct 8). Modified clicks (new tab etc.) are left alone. */
 export default function SmoothAnchors() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -22,7 +22,6 @@ export default function SmoothAnchors() {
       const pad = (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) + (parseFloat(getComputedStyle(target).scrollMarginTop) || 0);
       const top = target.getBoundingClientRect().top + window.scrollY - pad;
       glideTo(top, undefined, () => target.focus({ preventScroll: true }));
-      if (location.hash !== '#' + id) history.pushState(null, '', '#' + id);
     };
     document.addEventListener('click', onClick);
     return () => document.removeEventListener('click', onClick);

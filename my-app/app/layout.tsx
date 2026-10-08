@@ -1,6 +1,12 @@
 import type { Metadata } from 'next';
+import { Geist, Inter } from 'next/font/google';
 import './globals.css';
 import { variantScript } from './lib/variants';
+
+/* body-text options under review (the Font group, lib/variants.ts): from Google Fonts, self-hosted
+ * by next/font; only body and lead text switch — headings stay in Tomato Grotesk */
+const geist = Geist({ subsets: ['latin'], variable: '--font-geist', display: 'swap' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Leapfrog AI | Deep AI expertise. Boutique attention. Real results.',
@@ -10,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${geist.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
         {/* Tomato Grotesk is Leapfrog's brand face, self-hosted from /public/fonts. */}
         <link rel="preload" href="/fonts/TomatoGrotesk-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />

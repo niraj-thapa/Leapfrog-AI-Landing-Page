@@ -41,7 +41,7 @@ const SEC = {
   run:        { angle: -162, jelly: '#FF5F82', deep: '#D92B57', bg: ['#FAE6EB', '#FFC3D1', '#F7D2EC', '#FFF8FA'] },
 };
 const NEUTRAL_BG = ['#E8EAEC', '#DCE7E2', '#E4E0EE', '#F7F8F9'];
-const TILE_BG = ['#D9DCF6', '#B9E9CF', '#C9C0F5', '#EEF2FF'];   // the ring tile's field: lavender, mint, violet
+const TILE_BG = ['#6a5fc0', '#5a3fe0', '#8a6fd0', '#a99ce6'];   // the ring tile's field (Oct 8): a mid violet, toward what the Talk band's ring (V2) sees — clear glass with violet liquid, legible on the pale tile
 const NEUTRAL_GLOW = '#FFFFFF';
 
 /* the dialog's copy (reconciled Oct 8 with "Leapfrog_AI_Flywheel5.html"): each stage's
@@ -106,15 +106,15 @@ function setFlow(k) {                      // stage the travelling colour is pas
   if (k) section.dataset.flow = k; else delete section.dataset.flow;
   if (k) section.dispatchEvent(new CustomEvent('fw:flow', { detail: k }));
 }
-const enter = (k, pointerType) => { setHot(k, true); charge(k, pointerType); };
+const enter = (k, pointerType, fromCard = false) => { setHot(k, true); if (fromCard) charge(k, pointerType); };
 const leave = k => {
   setHot(k, false);
   if (chargeK === k) uncharge();
   if (suppress === k) suppress = null;
 };
 
-/* Version 6 (html[data-fw="6"]): a mouse resting on a stage — its card, ring label or
- * segment — opens its details after AUTO_OPEN_MS. Meanwhile the card shows it is about to
+/* Version 6 (html[data-fw="6"]): a mouse resting on a stage's card opens its details after
+ * AUTO_OPEN_MS (the ring's labels and segments only highlight; a click opens them). Meanwhile the card shows it is about to
  * open (.is-charging: "Opening", a filling ring, a bar along its foot). Moving off cancels;
  * so does a scroll (cards sliding under a still pointer are not a choice), and the stage
  * just closed stays shut until the pointer leaves it. Touch and keyboard never auto-open. */
@@ -198,9 +198,10 @@ section.querySelectorAll('[data-pick]').forEach(el => {
 // hover/focus highlighting: cards, chips, ring labels and the version 3 list
 section.querySelectorAll('[data-pick], [data-hover]').forEach(el => {
   const k = el.dataset.pick || el.dataset.hover;
-  on(el, 'pointerenter', e => enter(k, e.pointerType));
+  const card = el.classList.contains('panel');   // only a card auto-opens its details (Oct 8): the ring's labels and segments just highlight
+  on(el, 'pointerenter', e => enter(k, e.pointerType, card));
   on(el, 'pointerleave', () => leave(k));
-  on(el, 'pointermove', e => { if (state.hot === k) charge(k, e.pointerType); });   // resumes after a scroll
+  if (card) on(el, 'pointermove', e => { if (state.hot === k) charge(k, e.pointerType); });   // resumes after a scroll
   on(el, 'focus', () => setHot(k, true));
   on(el, 'blur', () => setHot(k, false));
 });
@@ -324,6 +325,8 @@ function startGL(THREE) {
   if (decor) ORDER.forEach(k => { labels[k] = document.createElement('span'); });
   else section.querySelectorAll('.ring-label').forEach(b => { labels[b.dataset.k] = b; });
 
+  const backCanvas = decor ? null : document.getElementById('fw-gl-back');
+  const backCtx = backCanvas ? backCanvas.getContext('2d') : null;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, stencil: false, powerPreference: 'high-performance' });
   const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
   renderer.setPixelRatio(DPR);
@@ -394,7 +397,7 @@ function startGL(THREE) {
 
   /* 1 · Backdrop */
   const bgU = {
-    uTime: U.time, uAspect: U.aspect,
+    uTime: U.time, uAspect: U.aspect, uFly: { value: 0 },   // 1 while the ring flies (TileFlight): no cast shadow on the backdrop
     uBase: { value: C(PAL0[0]) }, uB1: { value: C(PAL0[1]) }, uB2: { value: C(PAL0[2]) }, uB3: { value: C(PAL0[3]) },
     uGlow: { value: C(NEUTRAL_GLOW) }, uGlowAmt: { value: 0 },
     uMouse: { value: new THREE.Vector2(0.5, 0.5) },
@@ -409,7 +412,7 @@ function startGL(THREE) {
     uniforms: bgU, depthTest: false, depthWrite: false, vertexShader: FS_VERT,
     fragmentShader: /* glsl */`
       varying vec2 vUv;
-      uniform float uTime, uAspect, uGlowAmt, uDyeAmt, uActAmt, uPrism, uDark;
+      uniform float uTime, uAspect, uGlowAmt, uDyeAmt, uActAmt, uPrism, uDark, uFly;
       uniform vec3 uPrismGeo;
       uniform vec2 uActPt;
       uniform vec3 uBase, uB1, uB2, uB3, uGlow, uDye;
@@ -443,7 +446,7 @@ function startGL(THREE) {
         // light from the upper right: soft shadow and a focused caustic fall to the lower left behind the ring
         vec2 ds = d + vec2(0.16, 0.2);
         float rs = length(ds);
-        col *= 1.0 - 0.07 * exp(-pow((rs - 0.8) / 0.22, 2.0));
+        col *= 1.0 - 0.07 * (1.0 - uFly) * exp(-pow((rs - 0.8) / 0.22, 2.0));   // the soft cast shadow, off in flight (Oct 8)
         col += mix(uDye, vec3(1.0), 0.45) * 0.07 * (0.4 + 0.6 * uDyeAmt) * exp(-pow((rs - 0.62) / 0.06, 2.0)) * smoothstep(0.2, -0.6, ds.x + ds.y);
 
         // keep colour where the action is; fade to white toward the edges
@@ -1014,7 +1017,11 @@ function startGL(THREE) {
     if (idleFor > 3) { skip = !skip; if (skip) return; }       // idle: 30 fps
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    U.time.value += dt * (rm ? 0.25 : 1);
+    /* stuck in its hero tile (FL.calm 1) the liquid holds still; it starts moving again as the
+     * ring takes off (Oct 8) */
+    const liquid = 1 - (FL.active ? FL.calm : 0);
+    const ldt = dt * liquid;
+    U.time.value += ldt * (rm ? 0.25 : 1);
     const t = U.time.value;
     const ease = r => 1 - Math.exp(-dt * r);
 
@@ -1025,7 +1032,7 @@ function startGL(THREE) {
     if (segK !== state.seg) {
       if (state.seg) leave(state.seg);
       state.seg = segK;
-      if (segK) enter(segK, state.pointerType);
+      if (segK) enter(segK);
       if (!decor) canvas.style.cursor = segK ? 'pointer' : '';
     }
     // version 3 keeps the list's open stage lit (data-pin, StageList)
@@ -1047,9 +1054,9 @@ function startGL(THREE) {
 
     // water: clockwise current, travelling dye wave at rest, hovered stage floods with colour
     const flowSpeed = rm ? 0.05 : 0.26;
-    U.flow.value += flowSpeed * dt;
-    waterU.uFlowBase.value = flowSpeed;
-    waveAng = wrap(waveAng - flowSpeed * dt);
+    U.flow.value += flowSpeed * ldt;
+    waterU.uFlowBase.value = flowSpeed * liquid;
+    waveAng = wrap(waveAng - flowSpeed * ldt);
     // versions 4–5: while a stage is held, the travelling colour waits there, so it flows on from it
     if (autoMode() && !decor && section.dataset.pin && SEC[section.dataset.pin]) waveAng = wrap(SEC[section.dataset.pin].angle * DEG);
     waveAmt += ((active ? 0.12 : 1.0) - waveAmt) * ease(1.5);
@@ -1060,7 +1067,7 @@ function startGL(THREE) {
     waterU.uWaveAng.value = waveAng;
     waterU.uWaveAmt.value = waveAmt;
     waterU.uCursorAmt.value = overRing ? cAmt : cAmt * 0.3;
-    stepBubbles(dt, t, flowSpeed, cAmt, overRing);
+    stepBubbles(ldt, t, flowSpeed, cAmt, overRing);   // the bubbles hold still on the tile too
 
     // environment
     /* as a tile, the ring refracts a coloured field (it would read white on a pale one);
@@ -1068,9 +1075,16 @@ function startGL(THREE) {
     const calmTint = FL.active && FL.calm > 0.35;
     const dark = darkMode();
     const kd = ease(2.4);   // ease between light and dark with the page theme, no snap
-    bgU.uDark.value += ((dark ? 1 : 0) - bgU.uDark.value) * kd;
-    glassU.uStudio.value += ((dark ? 0.35 : 1) - glassU.uStudio.value) * kd;
-    glassU.uWin.value += ((dark ? 0 : 1) - glassU.uWin.value) * kd;
+    bgU.uFly.value = FL.active ? 1 : 0;
+    bgU.uDark.value += (Math.max(dark ? 1 : 0, FL.active ? 0.5 * FL.calm : 0) - bgU.uDark.value) * (FL.active ? 1 : kd);   // the tile ring is lit as on a dark ground (Talk V2), easing to light as it flies
+    /* on the tile (FL.calm), the reflections go as on the Talk band's ring (V2): no window panes,
+     * the studio's strip lights dimmed to its 0.35 — easing back in as the ring flies (Oct 8) */
+    const tileCalm = FL.active ? FL.calm : 0;
+    const studioT = dark ? 0.35 : 1 - 0.65 * tileCalm;   // 0.35 on the tile, as the Talk ring
+    const winT = dark ? 0 : 1 - tileCalm;
+    const kr = FL.active ? 1 : kd;   // follows the flight exactly (no lag), eases with the theme otherwise
+    glassU.uStudio.value += (studioT - glassU.uStudio.value) * kr;
+    glassU.uWin.value += (winT - glassU.uWin.value) * kr;
     const pal = opts.palette ? opts.palette : calmTint ? TILE_BG
       : dark ? (envKey ? DARK_SEC[envKey] : DARK_NEUTRAL)
       : envKey ? SEC[envKey].bg : NEUTRAL_BG;
@@ -1121,7 +1135,10 @@ function startGL(THREE) {
     const fl = FL.active;
     const shine = fl ? 1 - 0.65 * FL.calm : 1;   // some of the studio's shine stays on the tile
     glassU.uShine.value = shine;
-    glassU.uPop.value = fl ? Math.pow(FL.calm, 2.5) : 0;   // full on the tile, gone early in the flight
+    /* Oct 8: on the tile the glass is clear, as the Talk band's ring (V2) — no 'pop' (it frosted
+     * the rim white and over-saturated the liquid) and no stage seams, which return in flight */
+    glassU.uPop.value = 0;
+    glassU.uSeamOn.value = opts.seams === false ? 0 : 1 - (fl ? FL.calm : 0);
     bubbleU.uScale.value = fl ? Math.min(1, flightScale / baseScale) : 1;
     const pose = opts.pose || null;   // decorative: moved by the page (scroll)
     const sc = (fl ? flightScale : baseScale) * (0.94 + 0.06 * io) * (pose ? Math.max(0.001, pose.scale) : 1);
@@ -1196,6 +1213,13 @@ function startGL(THREE) {
     renderer.render(waterScene, camera);
     renderer.setRenderTarget(null);
     renderer.render(mainScene, camera);
+    // in flight (TileFlight), a copy of the frame goes to the backdrop canvas behind the
+    // section's text and cards, so the ring itself can fly over them while its backdrop
+    // stays under them (Oct 8)
+    if (FL.active && backCtx && section.classList.contains('is-flying')) {
+      if (backCanvas.width !== canvas.width || backCanvas.height !== canvas.height) { backCanvas.width = canvas.width; backCanvas.height = canvas.height; }
+      backCtx.drawImage(canvas, 0, 0);
+    }
     if (firstFrame) { firstFrame = false; section.classList.add('gl-ready'); FL.ready = true; }
   }
 

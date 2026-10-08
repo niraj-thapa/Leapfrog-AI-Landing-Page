@@ -31,6 +31,23 @@ export const VARIANT_GROUPS: VariantGroup[] = [
     ],
   },
   {
+    key: 'font',
+    label: 'Body font',
+    options: [
+      { value: '1', note: 'Tomato Grotesk (current)' },
+      { value: '2', note: 'Geist' },
+      { value: '3', note: 'Inter' },
+    ],
+  },
+  {
+    key: 'nav',
+    label: 'Header',
+    options: [
+      { value: '1', note: 'Scrolls away, returns on scroll up' },
+      { value: '2', note: 'Always sticky' },
+    ],
+  },
+  {
     key: 'fw',
     label: 'Flywheel',
     target: 'flywheel',
@@ -49,11 +66,12 @@ export const VARIANT_GROUPS: VariantGroup[] = [
     key: 'why',
     label: 'Measured by your outcomes',
     target: 'why',
-    default: '2', // chosen Oct 6
+    default: '4', // chosen Oct 8
     options: [
       { value: '1', note: 'Pillar explorer, picture panel' },
       { value: '2', note: 'Scroll story, sticky picture panel' },
       { value: '3', note: 'Scroll story in the page width, reasons 1-2-3' },
+      { value: '4', note: 'Version 3, client card upright as Boutique attention' },
     ],
   },
   {
@@ -98,8 +116,8 @@ export const VARIANT_GROUPS: VariantGroup[] = [
 ];
 
 /* the storage key carries a set number: bumping it (Oct 6, the chosen line-up; Oct 8, Flywheel
- * version 6) drops earlier choices, so every browser starts from the defaults above */
-const SET = '3';
+ * version 6; Oct 8, the sticky header) drops earlier choices, so every browser starts from the defaults above */
+const SET = '5';
 export const variantStorageKey = (key: string) => `variant${SET}:${key}`;
 export const defaultValue = (g: VariantGroup) => g.default ?? g.options[0].value;
 

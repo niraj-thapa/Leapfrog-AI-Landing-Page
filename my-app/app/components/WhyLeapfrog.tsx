@@ -43,13 +43,13 @@ const RESULT_STEPS = [
 ];
 
 /* the steps' build timing, as AgentFlow's */
-const STEP_LINE_MS = 280;
-const STEP_NEXT_MS = STEP_LINE_MS + 560;
+const STEP_LINE_MS = 80; // the card starts this long after its line (concourse.ai timing, see AgentFlow)
+const STEP_NEXT_MS = 400;
 
 type Pillar = (typeof PILLARS)[number];
 
 /* One pillar's picture scene — shared by both versions of the section. */
-function Scene({ p, open, inView }: { p: Pillar; open: boolean; inView: boolean }) {
+function Scene({ p, open, inView, testimonials = false }: { p: Pillar; open: boolean; inView: boolean; testimonials?: boolean }) {
   const stay = PILLARS[3];
   const x = EXTRA[p.key];
   const figRef = useRef<HTMLElement>(null);
@@ -95,10 +95,18 @@ function Scene({ p, open, inView }: { p: Pillar; open: boolean; inView: boolean 
 
   return (
     <figure ref={figRef} className={`why-scene${open ? ' is-open' : ''}${built ? ' is-built' : ''}`} data-tone={TONE[p.key]} aria-hidden={!open}>
-      <img className="why-photo" src={x.image} alt="" loading="lazy" />
-      <img className="why-photo why-photo--blur" src={x.image} alt="" loading="lazy" aria-hidden="true" />
-      <span className="why-shade" aria-hidden="true" />
-      {p.key === 'attention' && <ClientCard />}
+      {/* version 4: Boutique attention's picture is the client's card itself, upright and
+          filling the whole panel */}
+      {testimonials && p.key === 'attention' ? (
+        <ClientCard full />
+      ) : (
+        <>
+          <img className="why-photo" src={x.image} alt="" loading="lazy" />
+          <img className="why-photo why-photo--blur" src={x.image} alt="" loading="lazy" aria-hidden="true" />
+          <span className="why-shade" aria-hidden="true" />
+          {p.key === 'attention' && <ClientCard />}
+        </>
+      )}
 
       {p.key === 'expertise' && (
         <>
@@ -185,10 +193,10 @@ const CLIENT = {
   role: 'Cofounder & Head of Product',
 };
 
-function ClientCard() {
+function ClientCard({ full = false }: { full?: boolean }) {
   const quote = PILLARS[1].quote;
   return (
-    <div className="why-card">
+    <div className={`why-card${full ? ' why-card--full' : ''}`}>
       <img className="why-card-photo" src={CLIENT.photo} alt={CLIENT.name} loading="lazy" />
       {/* phones: the card fills the picture, as Webflow's — a blurred copy behind the story */}
       <img className="why-card-photo why-card-photo--blur" src={CLIENT.photo} alt="" loading="lazy" aria-hidden="true" />
@@ -357,6 +365,14 @@ export default function WhyLeapfrog() {
           <WhyStory numbered />
         </div>
       </div>
+
+      {/* version 4 — version 3 with Boutique attention's picture given to the client's card,
+          upright and filling the panel (html[data-why="4"]) */}
+      <div className="why-v4">
+        <div className="wrap">
+          <WhyStory numbered testimonials />
+        </div>
+      </div>
     </section>
   );
 }
@@ -380,7 +396,7 @@ const REASON_POINTS: Record<string, string[]> = {
   results: ['The success metric agreed first', 'First use case live in weeks', 'Every AI-assisted line reviewed'],
 };
 
-function WhyStory({ numbered = false }: { numbered?: boolean }) {
+function WhyStory({ numbered = false, testimonials = false }: { numbered?: boolean; testimonials?: boolean }) {
   const three = PILLARS.slice(0, 3);
   const [active, setActive] = useState(0);
   const [inView, setInView] = useState(false);
@@ -457,7 +473,7 @@ function WhyStory({ numbered = false }: { numbered?: boolean }) {
             <div className="why-story-media" data-i={i}>
               {stacked && (
                 <div className="why-stage">
-                  <Scene p={p} open inView={seen[i]} />
+                  <Scene p={p} open inView={seen[i]} testimonials={testimonials} />
                 </div>
               )}
             </div>
@@ -481,7 +497,7 @@ function WhyStory({ numbered = false }: { numbered?: boolean }) {
           )}
           <div className="why-stage">
             {three.map((p, i) => (
-              <Scene key={p.key} p={p} open={i === active} inView={inView} />
+              <Scene key={p.key} p={p} open={i === active} inView={inView} testimonials={testimonials} />
             ))}
           </div>
         </div>

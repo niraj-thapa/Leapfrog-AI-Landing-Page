@@ -507,18 +507,7 @@ body.fw-locked { overflow: hidden; }
 }
 .fw-modal.open .fw-dialog { opacity: 1; transform: none; }
 
-.sweep {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 4px;
-  width: 100%;
-  background: linear-gradient(90deg, var(--sec), var(--brand));
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.7s var(--ease-out) 0.1s;
-}
-.fw-modal.open .sweep { transform: scaleX(1); }
+/* (the coloured sweep along the dialog's top edge was removed, Oct 8) */
 
 /* the close, previous and next buttons are the page's secondary buttons (.btn-glass,
  * globals.css; Oct 8): close as a round one */
@@ -780,8 +769,10 @@ html.sq-text .fw.head-waits .fw-head [data-sq-split]:not(.is-sq-in) .sq-wi { opa
 }
 
 /* The live ring on its journey (TileFlight.tsx): the canvas is pinned to the viewport and
- * masked to the glass band at --fx/--fy, radius --fr; the section's backdrop is let in,
- * within the section only (below --fw-top), as the ring lands (--rev). */
+ * masked to the glass band at --fx/--fy, radius --fr; the section's backdrop shows within the
+ * section only (below --fw-top), at full strength the whole way (--rev 1, Oct 8 — it used to
+ * fade in as the ring landed), its top edge softened over 140px so it scrolls in with the
+ * section rather than as a hard line. */
 .fw.is-flight.is-flying .fw-gl {
   position: fixed;
   left: 0;
@@ -790,16 +781,32 @@ html.sq-text .fw.head-waits .fw-head [data-sq-split]:not(.is-sq-in) .sq-wi { opa
   bottom: auto;
   width: var(--fw-w);
   height: var(--fw-h);
-  z-index: 4; /* in front of the header (and everything else in the section) on its way in */
+  z-index: 4; /* the ring flies over the header and cards; its backdrop is drawn behind them (.fw-gl-back) */
   opacity: var(--fw-a, 1);
   transition: none;
   pointer-events: none;
   -webkit-mask-image:
-    radial-gradient(circle at var(--fx) var(--fy), transparent calc(var(--fr) * 0.505), #000 calc(var(--fr) * 0.53), #000 calc(var(--fr) * 0.99), transparent calc(var(--fr) * 1.03)),
-    linear-gradient(to bottom, transparent var(--fw-top, 100vh), rgba(0, 0, 0, var(--rev, 0)) var(--fw-top, 100vh));
+    radial-gradient(circle at var(--fx) var(--fy), transparent calc(var(--fr) * 0.505), #000 calc(var(--fr) * 0.53), #000 calc(var(--fr) * 0.975), transparent calc(var(--fr) * 0.995)); /* tight to the glass (Oct 8: was out to 1.03, which showed a halo of backdrop, its shadow, round the flying ring) */
   mask-image:
-    radial-gradient(circle at var(--fx) var(--fy), transparent calc(var(--fr) * 0.505), #000 calc(var(--fr) * 0.53), #000 calc(var(--fr) * 0.99), transparent calc(var(--fr) * 1.03)),
-    linear-gradient(to bottom, transparent var(--fw-top, 100vh), rgba(0, 0, 0, var(--rev, 0)) var(--fw-top, 100vh));
+    radial-gradient(circle at var(--fx) var(--fy), transparent calc(var(--fr) * 0.505), #000 calc(var(--fr) * 0.53), #000 calc(var(--fr) * 0.975), transparent calc(var(--fr) * 0.995)); /* tight to the glass (Oct 8: was out to 1.03, which showed a halo of backdrop, its shadow, round the flying ring) */
+}
+
+/* …and its backdrop: a copy of each frame (flywheel.js), pinned the same way but under the
+ * section's header, cards and labels, shown inside the section only (below --fw-top, its top
+ * edge softened over 140px) at full strength the whole way — so nothing fades in or out as the
+ * ring lands or takes off, and the ring passes over the text (Oct 8). */
+.fw-gl-back { display: none; }
+.fw.is-flight.is-flying .fw-gl-back {
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--fw-w);
+  height: var(--fw-h);
+  z-index: 1;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent var(--fw-top, 100vh), #000 calc(var(--fw-top, 100vh) + 140px));
+  mask-image: linear-gradient(to bottom, transparent var(--fw-top, 100vh), #000 calc(var(--fw-top, 100vh) + 140px));
 }
 
 /* Connector masks (flywheel.js): a solid copy of each line, pathLength 1. Offset −1 hides

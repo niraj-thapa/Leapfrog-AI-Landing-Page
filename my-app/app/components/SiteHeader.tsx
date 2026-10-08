@@ -10,10 +10,13 @@ import { CONTACT_HREF, CTA_LABEL, NAV_LINKS, SERVICE_LINKS } from '../lib/conten
  *    any scroll up — Square's sticky bar curves: in 0.25s cubic-bezier(0, 0, 0.2, 1),
  *    out 0.2s cubic-bezier(0.4, 0, 1, 1), transform only;
  *  - back at the top it reattaches. It stays put while a menu is open, and shows
- *    whenever something inside it has keyboard focus (CSS). */
+ *    whenever something inside it has keyboard focus (CSS).
+ * Sized as design.lftechnology.com's nav (Oct 8); once the page has scrolled it narrows
+ * (.is-compact). Version 2 (html[data-nav="2"], review button) is always on screen. */
 const DEADBAND = 6; // px: ignore jitter smaller than this
-const SHOW = 'transform 0.25s cubic-bezier(0, 0, 0.2, 1)';
-const HIDE = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1)';
+const WIDTH = 'max-width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1)'; // the pill narrowing as the page scrolls (.is-compact)
+const SHOW = `transform 0.25s cubic-bezier(0, 0, 0.2, 1), ${WIDTH}`;
+const HIDE = `transform 0.2s cubic-bezier(0.4, 0, 1, 1), ${WIDTH}`;
 
 export default function SiteHeader() {
   const [servicesOpen, setServicesOpen] = useState(false);
@@ -36,7 +39,7 @@ export default function SiteHeader() {
     const apply = (y: number) => {
       const h = inner.offsetHeight + 8;
       if (mode === 'attached') {
-        inner.style.transition = 'none';
+        inner.style.transition = WIDTH; // follows the scroll 1:1, but still narrows smoothly
         inner.style.transform = y > 0 ? `translate3d(0, ${-Math.min(y, h)}px, 0)` : '';
       } else if (mode === 'shown') {
         inner.style.transition = SHOW;
@@ -53,6 +56,17 @@ export default function SiteHeader() {
       const y = Math.max(0, window.scrollY);
       const dy = y - lastY;
       const h = inner.offsetHeight + 8;
+      /* once the page has moved, the pill narrows (as design.lftechnology.com's) */
+      header.classList.toggle('is-compact', y > 8);
+      /* version 2 (html[data-nav="2"], review button): always on screen */
+      if (document.documentElement.dataset.nav === '2') {
+        mode = 'shown';
+        inner.style.transition = SHOW;
+        inner.style.transform = '';
+        header.classList.remove('is-hidden');
+        lastY = y;
+        return;
+      }
       if (pinnedRef.current) {
         if (mode === 'hidden') mode = 'shown';
       } else if (y <= 0) {
@@ -73,9 +87,13 @@ export default function SiteHeader() {
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
+    /* switching versions in the review panel takes effect at once */
+    const mo = new MutationObserver(onScroll);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-nav'] });
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
+      mo.disconnect();
       cancelAnimationFrame(raf);
     };
   }, []);
@@ -108,10 +126,14 @@ export default function SiteHeader() {
     <header ref={headerRef} className="site-header">
       <div ref={innerRef} className="site-header-inner">
         <div className="header-pill">
-          <a href="/" className="header-logo" aria-label="Leapfrog home">
-            <img src="/assets/header-logo.svg" alt="" width={126} height={24} />
-            {/* the dark header's logo: the wordmark in white, the mark still green */}
-            <img src="/assets/header-logo-light.svg" alt="" width={126} height={24} className="header-logo-light" />
+          <a href="/" className="header-logo" aria-label="Leapfrog AI home">
+            <span className="header-logo-mark">
+              <img src="/assets/header-logo.svg" alt="" width={126} height={24} />
+              {/* the dark header's logo: the wordmark in white, the mark still green */}
+              <img src="/assets/header-logo-light.svg" alt="" width={126} height={24} className="header-logo-light" />
+            </span>
+            {/* "AI" after the wordmark, as design.lftechnology.com's "leapfrog design" (Oct 8) */}
+            <span className="header-logo-ai" aria-hidden="true">AI</span>
           </a>
 
           <nav className="header-nav" aria-label="Main navigation">

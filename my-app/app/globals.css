@@ -41,8 +41,8 @@
 :root {
   /* ink */
   --ink: #0d1411;
-  --ink-2: #36423c;
-  --ink-3: #56625c;
+  --ink-2: #2a3530;
+  --ink-3: #48534d;
   --paper: #e8eaec;
   --night: #0d1411;
   --brand: #038e43;
@@ -108,6 +108,9 @@
   --font:
     "Tomato Grotesk", "Hanken Grotesk", system-ui, -apple-system, "Segoe UI",
     sans-serif;
+  /* body and lead text: Tomato Grotesk, or Geist / Inter under review (html[data-font]);
+   * headings keep --font */
+  --font-body: var(--font);
 
   --rise-lift: 12px;
   --gutter: 32px;
@@ -161,7 +164,7 @@ body {
   margin: 0;
   background: transparent; /* the page colour lives on <html> so it can transition */
   color: var(--fg);
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
   overflow-x: clip;
@@ -191,6 +194,41 @@ h2,
 h3,
 h4 {
   font-weight: 600;
+}
+/* body-font options (Oct 8): Geist or Inter for body and lead text only — headings, titles,
+ * headlines and the big figures stay in Tomato Grotesk */
+html[data-font="2"] {
+  --font-body: var(--font-geist), system-ui, sans-serif;
+}
+html[data-font="3"] {
+  --font-body: var(--font-inter), system-ui, sans-serif;
+}
+:is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .h2,
+  .hero-statement,
+  .fw-title,
+  .fw-core-title,
+  .d-headline,
+  .results-title,
+  .story-headline,
+  .support-title,
+  .talk-title,
+  .contact-title,
+  .stage-tab-title,
+  .growth-value,
+  .hero-tile--stat strong,
+  .why-card-stat strong,
+  .panel-title,
+  .fw-chip-title,
+  .chip-title
+) {
+  font-family: var(--font);
 }
 /* no lone words on a last line, page-wide: headings and short labels balance their lines;
  * running text breaks "pretty" (the browser reflows the last lines so none is a single
@@ -306,12 +344,12 @@ svg {
 @property --fg-2 {
   syntax: "<color>";
   inherits: true;
-  initial-value: #36423c;
+  initial-value: #2a3530;
 }
 @property --fg-3 {
   syntax: "<color>";
   inherits: true;
-  initial-value: #56625c;
+  initial-value: #48534d;
 }
 @property --accent {
   syntax: "<color>";
@@ -390,8 +428,8 @@ svg {
 }
 :root {
   --fg: #0d1411;
-  --fg-2: #36423c;
-  --fg-3: #56625c;
+  --fg-2: #2a3530;
+  --fg-3: #48534d;
   --accent: #02713a;
   --card: rgba(255, 255, 255, 0.42);
   --card-hot: rgba(255, 255, 255, 0.88);
@@ -424,8 +462,8 @@ svg {
 html[data-theme="dark"] {
   --page-bg: var(--night);
   --fg: #f4f6f5;
-  --fg-2: #c3cbc7;
-  --fg-3: #8f9a95;
+  --fg-2: #d0d7d3;
+  --fg-3: #a0aaa5;
   --accent: #36c37a;
   --card: rgba(255, 255, 255, 0.05);
   --card-hot: rgba(255, 255, 255, 0.09);
@@ -650,11 +688,17 @@ html[data-theme="dark"] .btn-glass:hover,
   z-index: 50;
   padding: 0 clamp(16px, 5vw, 72px);
 }
+/* sized as design.lftechnology.com's nav (measured Oct 8): a 920px pill, 64px tall (16px from
+ * the top, ours as before); once the page has scrolled it narrows to 800px (.is-compact, SiteHeader) */
 .site-header-inner {
   position: relative;
-  max-width: 1280px;
+  max-width: 920px;
   margin: 0 auto;
-  padding-top: 16px;
+  padding-top: 16px; /* 16px from the top, as before (Oct 8; 24px as theirs sat too low) */
+  transition: max-width 0.45s var(--ease-out);
+}
+.site-header.is-compact .site-header-inner {
+  max-width: 800px;
 }
 /* Liquid-glass pill, after madebykota.com: an almost clear tint and a light blur;
  * the glass reads from its edges — a hairline ring, soft inner shading at the sides
@@ -665,7 +709,7 @@ html[data-theme="dark"] .btn-glass:hover,
   display: flex;
   align-items: center;
   min-height: 64px;
-  padding: 8px; /* even, so the centred menu sits on the bar's true centre (the logo carries its own inset) */
+  padding: 0 14px 0 12px; /* as theirs: 64px tall, the CTA 36px inside it */
   border: 0;
   border-radius: calc(
     var(--radius-btn) + 8px
@@ -724,15 +768,36 @@ html.hero-dark .header-pill {
 }
 .header-logo {
   position: relative;
-  display: block;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
   flex-shrink: 0;
-  width: 126px;
-  height: 24px;
-  margin-left: 16px;
+  justify-self: start;
+  margin-left: 8px;
+}
+.header-logo-mark {
+  position: relative;
+  display: block;
+  width: 105px;
+  height: 20px;
+}
+/* "AI" after the wordmark, as the design studio's "leapfrog design" — its capitals exactly the
+ * wordmark's "l" (measured Oct 8): the "l" spans 0.32–15.41px of the 20px mark (its file:
+ * 0.388–18.49 of 24 units), 15.09px tall; Tomato Grotesk's caps are 0.70 of the size, so
+ * 21.55px type, raised 2.91px so its cap top and baseline land on the l's (line-height 1:
+ * baseline 18.32px, cap top 3.23px into its box) */
+.header-logo-ai {
+  font-family: var(--font);
+  font-size: 21.55px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #79b231;
+  margin-top: -2.91px;
 }
 .header-logo img {
-  width: 126px;
-  height: 24px;
+  width: 105px;
+  height: 20px;
   transition: opacity var(--theme-ms) cubic-bezier(0.4, 0, 0.2, 1);
 }
 .header-logo .header-logo-light {
@@ -765,11 +830,11 @@ html.hero-dark .header-logo .header-logo-light {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: var(--radius-btn);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
-  line-height: 24px;
+  line-height: 20px;
   color: var(--ink);
   white-space: nowrap;
   transition:
@@ -846,8 +911,9 @@ html.hero-dark .header-menu a:hover {
   background: rgba(13, 20, 17, 0.05);
 }
 .header-cta {
-  min-height: 46px;
-  padding: 0 22px;
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
 }
 .header-toggle {
   display: none;
@@ -1075,56 +1141,24 @@ html.hero-dark .header-menu a:hover {
   transform: scale(1.6);
 }
 /* the ring tile: a soft stage-colour field, so the clear glass has colour to bend */
+/* the ring's tile (Oct 8): a calm pale field, as the Flywheel section behind the ring — light
+ * grey with a soft lavender glow under the ring — so the violet glass stands out (it was a
+ * four-colour pastel wash that the pale ring got lost in) */
 .hero-tile.hero-tile--ring {
   background:
     radial-gradient(
-      70% 70% at 22% 18%,
-      rgba(124, 92, 255, 0.34),
-      transparent 70%
+      62% 62% at 50% 55%,
+      rgba(150, 120, 255, 0.22),
+      transparent 72%
     ),
     radial-gradient(
-      70% 70% at 82% 30%,
-      rgba(47, 125, 255, 0.26),
+      90% 70% at 50% 100%,
+      rgba(200, 185, 255, 0.28),
       transparent 70%
     ),
-    radial-gradient(
-      80% 80% at 70% 88%,
-      rgba(25, 195, 125, 0.34),
-      transparent 70%
-    ),
-    radial-gradient(
-      60% 60% at 18% 85%,
-      rgba(255, 176, 32, 0.22),
-      transparent 70%
-    ),
-    #f4f6f8;
+    #eceef2;
 }
-/* a soft shadow cast by the ring onto the tile: a ring the glass's size (72% of the tile),
- * dropped a little and blurred, so it shows just below the glass and across the top of the
- * hole, lifting the ring off the field; it leaves with the ring */
-.hero-tile--ring::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 72%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  transform: translate(-50%, -40%);
-  background: radial-gradient(
-    closest-side,
-    transparent 68%,
-    rgba(40, 34, 100, 0.5) 76%,
-    rgba(40, 34, 100, 0.42) 93%,
-    transparent 100%
-  );
-  filter: blur(calc(0.3 * var(--u)));
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-.hero-tile--ring.is-launched::after {
-  opacity: 0;
-}
+/* (the soft shadow the ring cast on its tile was removed, Oct 8) */
 .hero-tile--ring .ring-glass,
 .tile-fly .ring-glass {
   position: absolute;
@@ -1390,6 +1424,8 @@ html.ring-live .tile-fly .ring-glass {
   bottom: clamp(24px, 5.5svh, 56px);
   z-index: 1;
   overflow: hidden;
+  padding-top: 44px; /* room for the badges' tooltips (they are clipped by the overflow) */
+  pointer-events: none; /* that room never blocks the hero; the badges take the pointer */
   -webkit-mask-image: linear-gradient(
     90deg,
     transparent,
@@ -1444,6 +1480,40 @@ html.ring-live .tile-fly .ring-glass {
 .badge:hover,
 .badge:focus-visible {
   opacity: 1;
+}
+/* the badge's name in a small tooltip above it on hover or focus, after capsulecrm.com's
+ * integration icons (measured Oct 8): white, a 1px #eeeeed hairline, 6px corners, 6×10
+ * padding, 12px medium, centred 12px above the badge, fading in over 0.2s. The marquee
+ * leaves room above the row for it (padding-top) and pauses while hovered. */
+.marquee .badge {
+  position: relative;
+  pointer-events: auto;
+}
+.marquee .badge::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 12px);
+  padding: 6px 10px;
+  border: 1px solid #eeeeed;
+  border-radius: 6px;
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  pointer-events: none;
+}
+.marquee .badge:hover::after,
+.marquee .badge:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 /* partner artwork (Figma "Partners"): white line art, AWS orange and Claude coral kept;
  * sized by shape so they read as one row — square badges tallest, the Claude wordmark
@@ -1666,17 +1736,18 @@ html.ring-live .tile-fly .ring-glass {
 .why {
   padding: var(--section-y) 0;
 }
+/* left-aligned, as the other sections' heads (Oct 8; was centred) */
 .why-head {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 20px;
   margin-bottom: var(--head-gap);
-  text-align: center;
+  text-align: left;
 }
 .why-head .lead {
   max-width: 78ch;
-  text-wrap: balance;
+  text-wrap: pretty;
 }
 .why-head .why-eyebrow + .h2 {
   margin-top: -6px;
@@ -2139,7 +2210,7 @@ html.ring-live .tile-fly .ring-glass {
 }
 .why-card-quote {
   margin: 18px 0 0;
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.5;
   text-indent: -0.4em;
   text-wrap: pretty;
@@ -2458,7 +2529,9 @@ html.ring-live .tile-fly .ring-glass {
   justify-content: center;
   align-items: stretch;
   gap: 22px;
-  width: min(470px, calc(100% - 48px));
+  width: max-content; /* as wide as the longest one-line description … */
+  min-width: min(470px, calc(100% - 48px));
+  max-width: calc(100% - 48px); /* … within the picture */
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2511,13 +2584,22 @@ html.ring-live .tile-fly .ring-glass {
   pointer-events: none;
 }
 .ag.is-playing .ag-box {
-  animation: ag-arrive var(--card-ms) linear var(--card-at) both;
-}
-.ag.is-playing .ag-box > * {
-  animation: ag-content var(--card-ms) linear var(--card-at) both;
+  animation: ag-in var(--card-ms) cubic-bezier(0.5, 0, 0, 1) var(--card-at) both;
 }
 .ag.is-playing .ag-box::after {
   animation: ag-rim var(--card-ms) linear var(--card-at) both;
+}
+/* as concourse.ai's agent cards (Lottie, Oct 8): from a heavy blur and nothing to sharp and
+ * whole, the box and its contents together, on cubic-bezier(0.5, 0, 0, 1) */
+@keyframes ag-in {
+  from {
+    opacity: 0;
+    filter: blur(24px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 @keyframes ag-arrive {
   0% {
@@ -2588,13 +2670,13 @@ html.ring-live .tile-fly .ring-glass {
   min-width: 0;
 }
 .ag-text strong {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.25;
   font-weight: 500;
   letter-spacing: -0.005em;
 }
 .ag-text span {
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.35;
   color: #56625c;
 }
@@ -2605,6 +2687,24 @@ html.ring-live .tile-fly .ring-glass {
   gap: 7px;
 } /* the Real results tag, with a live dot */
 /* the agents' Live tag: a small green pill — compact, but the tint and the pulsing dot carry it */
+/* pinned to the card's top right (Oct 8), out of the text's way, so each agent's description
+ * runs the card's full width on one line; the title leaves room for it */
+.ag-box .af-tag.ag-live {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+.ag-box:has(.ag-live) .ag-text strong {
+  padding-right: 56px;
+}
+.ag-text span {
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .ag-text span {
+    white-space: normal; /* phones: too narrow for one line */
+  }
+}
 .af-tag.ag-live {
   align-self: center;
   gap: 5px;
@@ -2748,18 +2848,24 @@ html[data-why="2"] .why-v2 {
  * (no empty paper between them on large screens): the steps on the left, the picture
  * pinned on the right, every corner rounded, with a caption naming the same reason. Greys
  * and ink only, as the eyebrows and headings (Oct 8: no rail, connector or tinted rim). */
-.why-v3 {
+.why-v3,
+.why-v4 {
   display: none;
 }
-html[data-why="3"] .why-v1 {
+html:is([data-why="3"], [data-why="4"]) .why-v1 {
   display: none;
 }
-html[data-why="3"] .why-v3 {
+html[data-why="3"] .why-v3,
+html[data-why="4"] .why-v4 {
   display: block;
 }
-.why-v3 .why-story {
+:is(.why-v3, .why-v4) .why-story {
   --why3-gap: clamp(48px, 5vw, 80px);
-  --why3-h: clamp(560px, calc(100svh - 180px), 800px); /* the picture's height */
+  --why3-h: clamp(
+    560px,
+    calc(100svh - 180px),
+    800px
+  ); /* the picture's height */
   /* where the picture pins: its caption (28px + 16px) and the picture centred in the screen,
    * clear of the site header */
   --why3-top: max(var(--header-h), calc(50svh - (var(--why3-h) + 44px) / 2));
@@ -2774,27 +2880,28 @@ html[data-why="3"] .why-v3 {
 /* each step's text centred on the picture beside it: its padding leaves a box exactly the
  * picture's height, level with it, and the text sits in the middle of that box (it grows if
  * the text is taller) */
-.why-v3 .why-story-step {
+:is(.why-v3, .why-v4) .why-story-step {
   box-sizing: border-box;
   min-height: 100svh;
   justify-content: center;
-  padding: calc(var(--why3-top) + 44px) 0 calc(100svh - var(--why3-top) - 44px - var(--why3-h));
+  padding: calc(var(--why3-top) + 44px) 0
+    calc(100svh - var(--why3-top) - 44px - var(--why3-h));
   opacity: 0.32;
 }
-.why-v3 .why-story-step.is-active {
+:is(.why-v3, .why-v4) .why-story-step.is-active {
   opacity: 1;
 }
-.why-v3 .why3-kicker {
+:is(.why-v3, .why-v4) .why3-kicker {
   margin: 0 0 16px; /* the section eyebrow's type, unchanged */
 }
-.why-v3 .why-story-step h3 {
+:is(.why-v3, .why-v4) .why-story-step h3 {
   font-size: 40px;
   line-height: 1.1;
 }
-.why-v3 .why-story-body {
+:is(.why-v3, .why-v4) .why-story-body {
   margin-top: 20px;
 }
-.why-v3 .why3-points {
+:is(.why-v3, .why-v4) .why3-points {
   display: grid;
   gap: 10px;
   margin: 24px 0 0;
@@ -2806,12 +2913,12 @@ html[data-why="3"] .why-v3 {
   line-height: 1.35;
   color: var(--fg);
 }
-.why-v3 .why3-points li {
+:is(.why-v3, .why-v4) .why3-points li {
   position: relative;
   padding-left: 26px;
 }
 /* a plain tick in the body grey */
-.why-v3 .why3-points li::before {
+:is(.why-v3, .why-v4) .why3-points li::before {
   content: "";
   position: absolute;
   left: 0;
@@ -2819,16 +2926,18 @@ html[data-why="3"] .why-v3 {
   width: 16px;
   height: 16px;
   background: var(--fg-3);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4l2.9 2.9 6.1-6.6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4l2.9 2.9 6.1-6.6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4l2.9 2.9 6.1-6.6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4l2.9 2.9 6.1-6.6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / 100% no-repeat;
 }
 /* the picture, pinned in the middle of the screen with its caption above it */
-.why-v3 .why-story-visual {
+:is(.why-v3, .why-v4) .why-story-visual {
   top: var(--why3-top);
   height: auto;
   margin-top: var(--why3-top);
 }
-.why-v3 .why-story-visual .why-stage {
+:is(.why-v3, .why-v4) .why-story-visual .why-stage {
   height: var(--why3-h);
   min-height: 0;
   border-radius: var(--radius-xl);
@@ -2861,20 +2970,106 @@ html[data-why="3"] .why-v3 {
   color: var(--fg);
 }
 @media (max-width: 900px) {
-  .why-v3 .wrap {
+  :is(.why-v3, .why-v4) .wrap {
     padding: 0;
   }
-  .why-v3 .why-story {
+  :is(.why-v3, .why-v4) .why-story {
     margin-top: 0;
     grid-template-columns: 1fr;
   }
-  .why-v3 .why-story-step {
+  :is(.why-v3, .why-v4) .why-story-step {
     min-height: 0;
     padding: 40px var(--gutter);
     opacity: 1;
   }
-  .why-v3 .why-story-step h3 {
+  :is(.why-v3, .why-v4) .why-story-step h3 {
     font-size: clamp(30px, 8vw, 40px);
+  }
+}
+
+/* ── Why Leapfrog V4: V3, with Boutique attention's picture given to the client card ──────
+ * html[data-why="4"] (ClientCard full). The same card as V1–V3 — SecondLook's portrait, the
+ * figure, the quote, the name, the role with the logo — filling the whole panel: the portrait
+ * edge to edge, the story in white along the bottom over a progressive blur (a blurred copy
+ * of the portrait faded in from ~45% down, under a dark tint), the type a step smaller. */
+.why-card.why-card--full {
+  inset: 0;
+  left: 0;
+  top: 0;
+  display: block;
+  width: auto;
+  border-radius: inherit;
+  background: #10161a;
+  box-shadow: none;
+  transform: none;
+  color: #fff;
+}
+.why-card--full .why-card-photo {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  object-position: 50% 60%; /* her face above the blur */
+}
+.why-card--full .why-card-photo--blur {
+  display: block;
+  filter: blur(14px);
+  scale: 1.05;
+  -webkit-mask-image: linear-gradient(transparent 62%, #000 76%);
+  mask-image: linear-gradient(transparent 62%, #000 76%);
+}
+.why-card--full::after {
+  content: "";
+  position: absolute;
+  inset: 59% 0 0;
+  background: linear-gradient(
+    transparent,
+    rgba(0, 0, 0, 0.35) 40%,
+    rgba(0, 0, 0, 0.62)
+  );
+}
+.why-card--full .why-card-text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: clamp(22px, 2.4vw, 34px) clamp(22px, 2.6vw, 36px);
+}
+.why-card--full .why-card-stat strong {
+  font-size: clamp(26px, 2.1vw, 32px);
+}
+.why-card--full .why-card-stat span {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
+}
+.why-card--full .why-card-quote {
+  margin-top: 14px;
+  font-size: clamp(18px, 1.05vw, 16px);
+  line-height: 1.5;
+}
+.why-card--full .why-card-name {
+  margin-top: 14px;
+  font-size: 15px;
+}
+.why-card--full .why-card-role {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.8);
+}
+.why-card--full .why-card-logo {
+  height: 20px;
+  filter: brightness(0) invert(1); /* white on the photo */
+}
+.why-card--full .why-card-bar {
+  background: rgba(255, 255, 255, 0.35);
+}
+/* phones: the story is taller there, so the blur starts higher to sit behind all of it */
+@media (max-width: 640px) {
+  .why-card--full .why-card-photo--blur {
+    -webkit-mask-image: linear-gradient(transparent 44%, #000 60%);
+    mask-image: linear-gradient(transparent 44%, #000 60%);
+  }
+  .why-card--full::after {
+    inset: 40% 0 0;
   }
 }
 
@@ -2911,19 +3106,17 @@ html[data-why="3"] .why-v3 {
   transform: scaleY(0);
   transform-origin: 50% 0;
 }
-/* built in as the agents are: down the column, the line from the card above draws (0.28s),
- * then the card arrives (0.68s); the next line starts as it is nearly sharp */
+/* built in as the agents are (concourse.ai timing): down the column, the line from the card
+ * above draws (0.18s) and the card comes in from a blur just after it (ag-in, 1s on
+ * cubic-bezier(0.5, 0, 0, 1)); the next starts 0.4s later */
 .why-steps .af-card {
   opacity: 0;
 }
 .why-scene.is-built .why-step + .why-step::before {
-  animation: ag-line 0.28s cubic-bezier(0.4, 0, 0.2, 1) var(--line-at) both;
+  animation: ag-line 0.18s cubic-bezier(0.4, 0, 0.2, 1) var(--line-at) both;
 }
 .why-scene.is-built .why-steps .af-card {
-  animation: ag-arrive 0.68s linear var(--card-at) both;
-}
-.why-scene.is-built .why-steps .af-card > * {
-  animation: ag-content 0.68s linear var(--card-at) both;
+  animation: ag-in 1s cubic-bezier(0.5, 0, 0, 1) var(--card-at) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .why-card,
@@ -3806,21 +3999,20 @@ html[data-results="2"] .results-v2 {
 .cs-story.is-active > :nth-child(3) {
   transition-delay: 0.31s;
 }
-/* only the foot carries the name, so the blur and tint are along the bottom only */
+/* only the foot carries the name: a plain dark gradient up from the bottom (Oct 8; was a
+ * progressive blur), eased over several stops so it has no visible edge */
 .cs-photo-blur {
-  -webkit-mask-image: linear-gradient(
-    transparent calc(100% - 170px),
-    #000 calc(100% - 60px)
-  );
-  mask-image: linear-gradient(
-    transparent calc(100% - 170px),
-    #000 calc(100% - 60px)
-  );
+  display: none;
 }
 .cs-photo-tint {
   background: linear-gradient(
-    transparent calc(100% - 170px),
-    rgba(0, 0, 0, 0.5)
+    to top,
+    rgba(0, 0, 0, 0.72) 0,
+    rgba(0, 0, 0, 0.6) 50px,
+    rgba(0, 0, 0, 0.4) 100px,
+    rgba(0, 0, 0, 0.2) 150px,
+    rgba(0, 0, 0, 0.07) 200px,
+    transparent 240px
   );
 }
 .cs-quote {
@@ -4293,6 +4485,7 @@ html[data-roadmap="2"] .roadmap-v2 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 35% 50%; /* the team photo (Oct 8): keeps the seated man on the left, the man in the red hat and the standing woman in frame */
 }
 .support-title {
   font-size: clamp(30px, 2.8vw, 40px);
@@ -4355,13 +4548,12 @@ html[data-roadmap="2"] .roadmap-v2 {
   height: 100%;
   padding: 12px 12px 24px;
   border-radius: var(--radius-xl);
+  /* the card always shows (Oct 8; was only on hover) */
+  background: var(--card);
+  box-shadow: var(--card-shadow);
   transition:
     background-color 0.3s var(--ease-out),
     box-shadow 0.3s var(--ease-out);
-}
-.insight:hover {
-  background: var(--card);
-  box-shadow: var(--card-shadow);
 }
 .insight-topic {
   order: 2;
@@ -4400,6 +4592,9 @@ html[data-roadmap="2"] .roadmap-v2 {
   letter-spacing: -0.03em;
   color: var(--fg);
 }
+.insight h3 a {
+  transition: color 0.25s var(--ease-out); /* eases to the brand colour on hover */
+}
 .insight h3 a:hover {
   color: var(--accent);
 }
@@ -4415,6 +4610,20 @@ html[data-roadmap="2"] .roadmap-v2 {
   order: 5;
   margin-top: auto;
   margin-left: 8px;
+}
+/* Read more: the text and its circled arrow in the brand colour; on hover only the arrow moves
+ * (the gap widens), the colour stays (Oct 8) */
+.insight .link-arrow:hover {
+  color: var(--accent);
+}
+.insight-arrow {
+  flex-shrink: 0;
+}
+/* the button to all insights, under the cards */
+.insights-foot {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(32px, 4vw, 48px);
 }
 
 /* ── 7 Straight answers ──────────────────────────────────────────────────── */
@@ -4552,6 +4761,12 @@ html[data-faq="2"] .faq-list {
   width: 14px;
   height: 1.75px;
 }
+/* the page's SVG arrow (Arrow.tsx, Oct 8): sits on the text line, never squeezed */
+svg.arrow {
+  flex-shrink: 0;
+  vertical-align: -0.125em;
+  overflow: visible;
+}
 /* the secondary buttons' icons, a size up (Oct 8): the arrow in "See how we work" and the
  * play mark in "Watch the film" (the Expand all plus is .faq-ic--small, above) */
 .btn-glass .btn-ic {
@@ -4600,9 +4815,6 @@ html[data-faq="2"] .faq-list {
 }
 
 /* dark-ink SVG icons follow the theme */
-html[data-theme="dark"] .insight .link-arrow img {
-  filter: invert(1);
-}
 html[data-theme="dark"] .faq-ic {
   --ic: rgba(255, 255, 255, 0.75);
 }

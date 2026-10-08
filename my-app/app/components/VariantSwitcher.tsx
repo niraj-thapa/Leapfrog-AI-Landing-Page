@@ -16,10 +16,10 @@ function goTo(g: VariantGroup) {
 /* The review button: a floating button at the bottom right that opens a panel listing
  * every section with versions under review (lib/variants.ts) — pick one and the page
  * switches at once and glides to that section, so the change is in view (colour options
- * stay put). It opens on arrival; the button turns into a × to close it (or Escape). Remove it (and the script in
+ * stay put). It opens on arrival; the button turns into a × to close it (or Escape, or a click outside). Remove it (and the script in
  * layout.tsx) once the versions are settled. */
 export default function VariantSwitcher() {
-  const [open, setOpen] = useState(true); // open on arrival; the button (now a ×) or Escape closes it
+  const [open, setOpen] = useState(true); // open on arrival; the button (now a ×), Escape or a click outside closes it
   const [chosen, setChosen] = useState<Record<string, string>>({});
   const rootRef = useRef<HTMLDivElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
@@ -38,8 +38,16 @@ export default function VariantSwitcher() {
         fabRef.current?.focus();
       }
     };
+    /* a click or tap anywhere outside the panel and its button closes it (Oct 8) */
+    const onDown = (e: PointerEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+    };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onDown);
+    };
   }, [open]);
 
   const pick = (g: VariantGroup, value: string, isDefault: boolean) => {

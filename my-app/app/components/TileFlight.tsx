@@ -216,7 +216,7 @@ export default function TileFlight() {
         const spin = SPIN_LAND + SPIN_PER_PX * Math.max(0, fr.top - startTop); // continuous into the flight
         setRing(a.left + a.width / 2, a.top + a.height / 2, a.width * RING_SHARE, spin, 0);
         fw.style.setProperty('--fw-a', tileShown.toFixed(3));
-        fw.style.setProperty('--rev', '0');
+        fw.style.setProperty('--fw-top', `${Math.max(0, fr.top).toFixed(1)}px`); // the backdrop copy stays inside the section
       }
 
       if (flying) {
@@ -246,8 +246,11 @@ export default function TileFlight() {
         if (live) {
           setRing(cx, cy, size * RING_SHARE, SPIN_LAND * (1 - e), TILT * Math.sin(Math.PI * e));
           fw.style.setProperty('--fw-a', '1');
-          /* the backdrop arrives inside the section only, as the ring lands */
-          fw.style.setProperty('--rev', span(p, 0.8, 1).toFixed(3));
+          /* the section's backdrop (the ring's own, drawn on the canvas) shows inside the section
+           * at full strength the whole way, so the section arrives with its real background —
+           * no fade in just before the ring lands, or out just after it takes off (Oct 8; was
+           * ramped in over the last 20% of the flight) */
+          fw.style.setProperty('--rev', '1');
           fw.style.setProperty('--fw-top', `${Math.max(0, fr.top).toFixed(1)}px`);
           fly.style.opacity = '1';
         } else {

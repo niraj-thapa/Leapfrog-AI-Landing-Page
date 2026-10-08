@@ -40,7 +40,7 @@ export default function CredibilityMarquee({ tabbable = true }: { tabbable?: boo
               href={b.href}
               className="badge"
               aria-label={real ? b.name : undefined}
-              title={b.name}
+              data-tooltip={b.name} /* the name in a small tooltip on hover (CSS), as capsulecrm.com's integration icons */
               tabIndex={real && tabbable ? 0 : -1}
             >
               <img src={b.mono} alt="" className={`badge-img badge-img--${b.kind}`} />
@@ -52,8 +52,6 @@ export default function CredibilityMarquee({ tabbable = true }: { tabbable?: boo
 
   return (
     <div className="marquee" role="region" aria-label="Partner credentials">
-      {/* a small label over the row, as concourse.ai's "Working with 100+ finance departments" */}
-      <p className="marquee-label">100+ AI initiatives</p>
       <ul className="marquee-track">
         {run(0)}
         {run(1)}

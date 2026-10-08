@@ -35,12 +35,14 @@ export const VARIANT_GROUPS: VariantGroup[] = [
     label: 'Flywheel',
     target: 'flywheel',
     legacy: 'fw-variant',
+    default: '6', // chosen Oct 8
     options: [
       { value: '1', note: 'Cards around the ring' },
       { value: '2', note: 'Chips, cards in a row below' },
       { value: '3', note: 'Stage list beside the ring' },
       { value: '4', note: 'List, liquid plays through the stages' },
       { value: '5', note: 'Version 4 on a dark ground' },
+      { value: '6', note: 'Version 1, one benefit per card, opens on hover' },
     ],
   },
   {
@@ -51,6 +53,7 @@ export const VARIANT_GROUPS: VariantGroup[] = [
     options: [
       { value: '1', note: 'Pillar explorer, picture panel' },
       { value: '2', note: 'Scroll story, sticky picture panel' },
+      { value: '3', note: 'Scroll story in the page width, reasons 1-2-3' },
     ],
   },
   {
@@ -94,9 +97,9 @@ export const VARIANT_GROUPS: VariantGroup[] = [
   },
 ];
 
-/* the storage key carries a set number: bumping it (Oct 6, the chosen line-up) drops earlier
- * choices, so every browser starts from the defaults above */
-const SET = '2';
+/* the storage key carries a set number: bumping it (Oct 6, the chosen line-up; Oct 8, Flywheel
+ * version 6) drops earlier choices, so every browser starts from the defaults above */
+const SET = '3';
 export const variantStorageKey = (key: string) => `variant${SET}:${key}`;
 export const defaultValue = (g: VariantGroup) => g.default ?? g.options[0].value;
 

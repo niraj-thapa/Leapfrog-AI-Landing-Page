@@ -44,16 +44,19 @@ const NEUTRAL_BG = ['#E8EAEC', '#DCE7E2', '#E4E0EE', '#F7F8F9'];
 const TILE_BG = ['#D9DCF6', '#B9E9CF', '#C9C0F5', '#EEF2FF'];   // the ring tile's field: lavender, mint, violet
 const NEUTRAL_GLOW = '#FFFFFF';
 
+/* the dialog's copy (reconciled Oct 8 with "Leapfrog_AI_Flywheel5.html"): each stage's
+ * headline is its one benefit (version 6's cards), and its example is labelled as what it
+ * is — an offering, an outcome or a benefit */
 const DETAILS = {
-  validate: { stage: '01 · Validate · AI-Driven Design', headline: 'Know what’s worth building', desc: 'Find the use cases with the biggest payoff and test them with real users before you invest, through AI discovery workshops, working prototypes and AI-augmented research, with designers guiding every result.', proof: 'RAPID workshop: fully funded for qualified AWS accounts', cta: 'Explore AI-Driven Design', href: 'https://design.lftechnology.com/' },
-  build: { stage: '02 · Build · AI Solutions', headline: 'Build the AI you can’t buy', desc: 'We start with your goals and build the agents, customer experiences and automations to reach them. Our industry accelerators let you skip months of groundwork, with the integration, controls and compliance daily use demands.', proof: '$12.3M saved annually with an AI-powered platform', cta: 'Explore AI Solutions', href: '/solutions' },
-  enable: { stage: '03 · Enable · AI Enablement', headline: 'Put everyday AI to work for your teams', desc: 'We roll out Claude with custom skills, connectors and a redesigned workflow built around how your teams work, then train your champions to scale the next one.', proof: 'Fixed scope, fixed fee, live in 30 days', cta: 'Explore AI Enablement', href: '/enablement' },
-  accelerate: { stage: '04 · Accelerate · AI-Native Engineering', headline: 'Help your engineers ship faster', desc: 'Forward-deployed engineers join your team and bring AI best practices to every step of your development lifecycle, from design and coding to AI-driven testing, measured for speed and quality.', proof: '500+ engineers · AI Center of Excellence', cta: 'Explore AI-Native Engineering', href: '/engineering' },
-  run: { stage: '05 · Run · AI Managed Services', headline: 'Keep AI reliable as it spreads', desc: 'We monitor, secure and tune your AI in production, including AI built by others, and feed what we learn into the next turn of the wheel.', proof: '[Client example]', cta: 'Explore AI Managed Services', href: '/managed-services' },
-  all: { stage: 'Turnkey · The whole flywheel', headline: 'One partner turning the whole wheel', desc: 'We start with a quick win and keep the wheel turning: validating what’s next, building it, getting teams using it, speeding up engineering and running it all against your success metrics. Each turn reaches further across your business.', proof: 'Handpicked delivery lead · executive sponsor', cta: 'Talk through your AI roadmap', href: '/contact' },
+  validate: { stage: '01 · Validate · AI-Driven Design', headline: 'Rapidly shape what’s next', desc: 'Go from idea to tested product and brand in weeks. AI speeds up discovery, research, prototyping and brand work for any product, service or AI use case, so you test with real users before you invest. Designers guide and review every result.', plabel: 'Example offering', proof: 'An AI discovery workshop (RAPID), fully funded by AWS for qualified accounts', cta: 'Explore AI-Driven Design', href: 'https://design.lftechnology.com/' },
+  build: { stage: '02 · Build · AI Solutions', headline: 'Build the AI you can’t buy', desc: 'We start with your goals and build the agents, customer experiences and automations to reach them. Our industry accelerators let you skip months of groundwork, with the integration, controls and compliance daily use demands.', plabel: 'Example outcome', proof: '$12.3M saved annually with an AI-powered platform', cta: 'Explore AI Solutions', href: '/solutions' },
+  enable: { stage: '03 · Enable · AI Enablement', headline: 'Get every team using AI', desc: 'We roll out Claude with custom skills, connectors and a redesigned workflow built around how your teams work, then train your champions to scale the next one.', plabel: 'Example offering', proof: 'One workflow live on Claude in 30 days, with a fixed scope and fixed fee', cta: 'Explore AI Enablement', href: '/enablement' },
+  accelerate: { stage: '04 · Accelerate · AI-Native Engineering', headline: 'Ship software faster with AI', desc: 'Forward-deployed engineers join your team and bring AI best practices to every step of your development lifecycle, from design and coding to AI-driven testing, measured for speed and quality.', plabel: 'Example benefit', proof: 'Forward-deployed engineers help your team release faster with fewer defects, measured on cycle time and quality', cta: 'Explore AI-Native Engineering', href: '/engineering' },
+  run: { stage: '05 · Run · AI Managed Services', headline: 'Keep AI reliable and improving', desc: 'We monitor, secure and tune your AI in production, including AI built by others, and feed what we learn into the next turn of the wheel.', plabel: 'Example outcome', proof: '[Client example: uptime, cost or quality result to come]', cta: 'Explore AI Managed Services', href: '/managed-services' },
+  all: { stage: 'Turnkey · The whole flywheel', headline: 'One partner turning the whole wheel', desc: 'We start with a quick win and keep the wheel turning: validating what’s next, building it, getting teams using it, speeding up engineering and running it all against your success metrics. Each turn reaches further across your business.', plabel: 'Every engagement includes', proof: 'A handpicked delivery lead and a Leapfrog executive sponsor', cta: 'Talk through your AI roadmap', href: '/contact' },
 };
 const EXAMPLES = {
-  validate: ['AI discovery and roadmaps', 'Clickable prototypes', 'User research and brand assets'],
+  validate: ['Rapid discovery and roadmaps', 'Clickable prototypes and user testing', 'Product design, brand and launch assets'],
   build: ['Industry accelerators', 'Agentic workflows', 'Customer-facing AI assistants'],
   enable: ['Claude rollouts, live in 30 days', 'Custom skills and MCP connectors', 'Role-based training and governance'],
   accelerate: ['Forward-deployed engineers', 'AI-driven test automation', 'AI-accelerated development practices'],
@@ -77,7 +80,8 @@ const state = {
   pointerType: 'mouse',
 };
 
-/* ── Hover / selection plumbing. Hover only highlights; the dialog opens on click. ── */
+/* ── Hover / selection plumbing. Hover highlights; the dialog opens on click (and, in
+ * version 6, after the mouse rests on a stage for a moment: see charge()). ── */
 
 let current = null, lastFocus = null, closing = null;
 const isOpen = () => modal.classList.contains('open');
@@ -102,12 +106,40 @@ function setFlow(k) {                      // stage the travelling colour is pas
   if (k) section.dataset.flow = k; else delete section.dataset.flow;
   if (k) section.dispatchEvent(new CustomEvent('fw:flow', { detail: k }));
 }
-const enter = k => setHot(k, true);
-const leave = k => setHot(k, false);
+const enter = (k, pointerType) => { setHot(k, true); charge(k, pointerType); };
+const leave = k => {
+  setHot(k, false);
+  if (chargeK === k) uncharge();
+  if (suppress === k) suppress = null;
+};
+
+/* Version 6 (html[data-fw="6"]): a mouse resting on a stage — its card, ring label or
+ * segment — opens its details after AUTO_OPEN_MS. Meanwhile the card shows it is about to
+ * open (.is-charging: "Opening", a filling ring, a bar along its foot). Moving off cancels;
+ * so does a scroll (cards sliding under a still pointer are not a choice), and the stage
+ * just closed stays shut until the pointer leaves it. Touch and keyboard never auto-open. */
+const AUTO_OPEN_MS = 750;
+let chargeK = null, chargeTimer = 0, suppress = null, lastScroll = 0;
+function chargeMode() { return !decor && document.documentElement.dataset.fw === '6' && desktopMq.matches; }
+function charge(k, pointerType) {
+  if (chargeK === k) return;
+  uncharge();
+  if (!chargeMode() || pointerType !== 'mouse' || isOpen() || suppress === k) return;
+  if (section.classList.contains('is-flight') || section.classList.contains('is-assembling')) return;
+  if (performance.now() - lastScroll < 200) return;
+  chargeK = k;
+  section.querySelectorAll('.panel[data-k="' + k + '"]').forEach(el => el.classList.add('is-charging'));
+  chargeTimer = setTimeout(() => { uncharge(); open(k); }, AUTO_OPEN_MS);
+}
+function uncharge() {
+  clearTimeout(chargeTimer);
+  chargeK = null;
+  section.querySelectorAll('.is-charging').forEach(el => el.classList.remove('is-charging'));
+}
 
 function fill(k) {
   const d = DETAILS[k];
-  for (const f of ['stage', 'headline', 'desc', 'proof', 'cta']) document.getElementById('d-' + f).textContent = d[f];
+  for (const f of ['stage', 'headline', 'desc', 'plabel', 'proof', 'cta']) document.getElementById('d-' + f).textContent = d[f];
   const dl = document.getElementById('d-link');
   dl.href = d.href;
   const ext = /^https?:/.test(d.href);
@@ -125,13 +157,14 @@ function fill(k) {
   const i = ORDER.indexOf(k);
   document.getElementById('d-prev-l').textContent = NAMES[ORDER[(i + 4) % 5]];
   document.getElementById('d-next-l').textContent = NAMES[ORDER[(i + 1) % 5]];
-  [['d-stage', 0.05], ['d-headline', 0.09], ['d-desc', 0.13], ['d-ex-wrap', 0.15]].forEach(([id, dl]) => {
+  [['d-stage', 0.05], ['d-headline', 0.09], ['d-desc', 0.13], ['d-ex-wrap', 0.15], ['d-proof-wrap', 0.2]].forEach(([id, dl]) => {
     const el = document.getElementById(id);
     el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; el.style.animationDelay = dl + 's';
   });
 }
 function open(k) {
   clearTimeout(closing);
+  uncharge();
   current = k; setSel(k); fill(k);
   if (!isOpen()) {
     lastFocus = document.activeElement;
@@ -143,6 +176,7 @@ function open(k) {
 }
 function close() {
   if (!isOpen()) return;
+  suppress = current;   // version 6: the stage under the pointer doesn't open again at once
   modal.classList.remove('open');
   document.body.classList.remove('fw-locked');
   closing = setTimeout(() => { modal.hidden = true; }, 320);
@@ -164,8 +198,9 @@ section.querySelectorAll('[data-pick]').forEach(el => {
 // hover/focus highlighting: cards, chips, ring labels and the version 3 list
 section.querySelectorAll('[data-pick], [data-hover]').forEach(el => {
   const k = el.dataset.pick || el.dataset.hover;
-  on(el, 'pointerenter', () => enter(k));
+  on(el, 'pointerenter', e => enter(k, e.pointerType));
   on(el, 'pointerleave', () => leave(k));
+  on(el, 'pointermove', e => { if (state.hot === k) charge(k, e.pointerType); });   // resumes after a scroll
   on(el, 'focus', () => setHot(k, true));
   on(el, 'blur', () => setHot(k, false));
 });
@@ -249,6 +284,8 @@ function autoMode() { const v = document.documentElement.dataset.fw; return v ==
 function darkMode() { const r = document.documentElement; return !!opts.dark || (!decor && r.dataset.fw === '5' && r.dataset.theme === 'dark'); }
 function uiZoom(el) { return parseFloat(getComputedStyle(el).zoom) || 1; }
 on(window, 'resize', liftPanels);
+on(window, 'scroll', () => { lastScroll = performance.now(); if (chargeK) uncharge(); }, { passive: true });
+cleanups.push(() => clearTimeout(chargeTimer));
 const layoutTimer = setTimeout(() => { liftPanels(); window.dispatchEvent(new Event('fw:layout')); }, 1000);
 cleanups.push(() => clearTimeout(layoutTimer));   // after the entrance animation settles
 if (document.fonts) document.fonts.ready.then(() => { if (!disposed) liftPanels(); });
@@ -877,7 +914,20 @@ function startGL(THREE) {
   let W = 1, H = 1, baseScale = 1, ringPx = 400, ppuL = 1, flightScale = 1, wasFlight = false;
   const anchors = {};
   const linksMq = window.matchMedia('(max-width: 820px)');
+  /* version 6: the ring's top edge sits the page's heading gap below the header (its
+   * padding-bottom, --head-gap), as the other sections' content sits under their heads —
+   * the stage is pulled up by the empty space above the ring (--ring-pull, flywheel.css).
+   * Measured with the pull already applied, so a second pass finds the same value. */
+  function pullRing() {
+    if (decor || document.documentElement.dataset.fw !== '6' || !desktopMq.matches) { section.style.removeProperty('--ring-pull'); return; }
+    const s = slot.getBoundingClientRect(), h = head.getBoundingClientRect();
+    const cur = parseFloat(section.style.getPropertyValue('--ring-pull')) || 0;
+    const rp = Math.max(180, Math.min(s.width * 0.92, s.height * 0.92, section.getBoundingClientRect().height * 0.52));   // the ring's size, as below
+    const pull = Math.max(0, Math.round(s.top + s.height / 2 - rp / 2 - h.bottom + cur));
+    if (Math.abs(pull - cur) > 0.5) section.style.setProperty('--ring-pull', pull + 'px');
+  }
   function layout() {
+    pullRing();
     liftPanels();
     const sr = section.getBoundingClientRect();
     W = Math.max(1, sr.width); H = Math.max(1, sr.height);
@@ -975,7 +1025,7 @@ function startGL(THREE) {
     if (segK !== state.seg) {
       if (state.seg) leave(state.seg);
       state.seg = segK;
-      if (segK) enter(segK);
+      if (segK) enter(segK, state.pointerType);
       if (!decor) canvas.style.cursor = segK ? 'pointer' : '';
     }
     // version 3 keeps the list's open stage lit (data-pin, StageList)

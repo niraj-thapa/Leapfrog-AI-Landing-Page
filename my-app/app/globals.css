@@ -2743,6 +2743,141 @@ html[data-why="2"] .why-v2 {
   }
 }
 
+/* ── Why Leapfrog V3: the scroll story inside the page width, as reasons 1-2-3 ──────────
+ * html[data-why="3"] (WhyStory numbered). The text and the picture share the page's width
+ * (no empty paper between them on large screens): the steps on the left, the picture
+ * pinned on the right, every corner rounded, with a caption naming the same reason. Greys
+ * and ink only, as the eyebrows and headings (Oct 8: no rail, connector or tinted rim). */
+.why-v3 {
+  display: none;
+}
+html[data-why="3"] .why-v1 {
+  display: none;
+}
+html[data-why="3"] .why-v3 {
+  display: block;
+}
+.why-v3 .why-story {
+  --why3-gap: clamp(48px, 5vw, 80px);
+  --why3-h: clamp(560px, calc(100svh - 180px), 800px); /* the picture's height */
+  /* where the picture pins: its caption (28px + 16px) and the picture centred in the screen,
+   * clear of the site header */
+  --why3-top: max(var(--header-h), calc(50svh - (var(--why3-h) + 44px) / 2));
+  /* up by that pinning room, so the picture's caption sits the heading gap (--head-gap,
+   * 48–80px) under the heading, as other sections' content */
+  margin-top: calc(-1 * var(--why3-top));
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  column-gap: var(--why3-gap);
+  align-items: start;
+}
+/* each step's text centred on the picture beside it: its padding leaves a box exactly the
+ * picture's height, level with it, and the text sits in the middle of that box (it grows if
+ * the text is taller) */
+.why-v3 .why-story-step {
+  box-sizing: border-box;
+  min-height: 100svh;
+  justify-content: center;
+  padding: calc(var(--why3-top) + 44px) 0 calc(100svh - var(--why3-top) - 44px - var(--why3-h));
+  opacity: 0.32;
+}
+.why-v3 .why-story-step.is-active {
+  opacity: 1;
+}
+.why-v3 .why3-kicker {
+  margin: 0 0 16px; /* the section eyebrow's type, unchanged */
+}
+.why-v3 .why-story-step h3 {
+  font-size: 40px;
+  line-height: 1.1;
+}
+.why-v3 .why-story-body {
+  margin-top: 20px;
+}
+.why-v3 .why3-points {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0 0;
+  padding: 20px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--fg);
+}
+.why-v3 .why3-points li {
+  position: relative;
+  padding-left: 26px;
+}
+/* a plain tick in the body grey */
+.why-v3 .why3-points li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.1em;
+  width: 16px;
+  height: 16px;
+  background: var(--fg-3);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4l2.9 2.9 6.1-6.6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4l2.9 2.9 6.1-6.6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+/* the picture, pinned in the middle of the screen with its caption above it */
+.why-v3 .why-story-visual {
+  top: var(--why3-top);
+  height: auto;
+  margin-top: var(--why3-top);
+}
+.why-v3 .why-story-visual .why-stage {
+  height: var(--why3-h);
+  min-height: 0;
+  border-radius: var(--radius-xl);
+}
+.why3-caption {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  margin-bottom: 16px;
+}
+.why3-caption-text {
+  display: grid;
+  font-size: 14px;
+  color: var(--fg-3);
+}
+.why3-caption-text > span {
+  grid-area: 1 / 1;
+  opacity: 0;
+  translate: 0 6px;
+  transition:
+    opacity 0.4s var(--ease-out),
+    translate 0.4s var(--ease-out);
+}
+.why3-caption-text > span.is-active {
+  opacity: 1;
+  translate: 0 0;
+}
+.why3-caption-text b {
+  font-weight: 600;
+  color: var(--fg);
+}
+@media (max-width: 900px) {
+  .why-v3 .wrap {
+    padding: 0;
+  }
+  .why-v3 .why-story {
+    margin-top: 0;
+    grid-template-columns: 1fr;
+  }
+  .why-v3 .why-story-step {
+    min-height: 0;
+    padding: 40px var(--gutter);
+    opacity: 1;
+  }
+  .why-v3 .why-story-step h3 {
+    font-size: clamp(30px, 8vw, 40px);
+  }
+}
+
 /* results: the path as three cards, rising in one after another when its scene opens */
 /* centred between the top band and the proof strip (measured, Scene) */
 .why-steps {
@@ -3604,20 +3739,73 @@ html[data-results="2"] .results-v2 {
 /* switching stories: the photos crossfade (0.8s), the new one settling from 1.06× (1.4s) and
  * its name rising in after; the text steps out quickly (0.25s) while the new story's quote,
  * facts and button rise in 12px one after another (0.6s, 80ms apart, after 0.15s) */
-.cs-shot { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s var(--ease-out); }
-.cs-shot.is-active { opacity: 1; }
-.cs-shot .story-photo-img:not(.story-photo-blur) { transform: scale(1.06); transition: transform 1.4s var(--ease-out); }
-.cs-shot.is-active .story-photo-img:not(.story-photo-blur) { transform: none; }
-.cs-shot .story-who { opacity: 0; translate: 0 10px; transition: opacity 0.3s var(--ease-out), translate 0.3s var(--ease-out); }
-.cs-shot.is-active .story-who { opacity: 1; translate: 0 0; transition: opacity 0.6s var(--ease-out) 0.3s, translate 0.6s var(--ease-out) 0.3s; }
-.cs-stories { display: grid; }
-.cs-story { grid-area: 1 / 1; display: flex; flex-direction: column; visibility: hidden; transition: visibility 0s 0.25s; }
-.cs-story.is-active { visibility: visible; transition: none; }
-.cs-story > * { opacity: 0; translate: 0 12px; transition: opacity 0.25s var(--ease-out), translate 0.25s var(--ease-out); }
-.cs-story.is-active > * { opacity: 1; translate: 0 0; transition: opacity 0.6s var(--ease-out), translate 0.6s var(--ease-out); }
-.cs-story.is-active > :nth-child(1) { transition-delay: 0.15s; }
-.cs-story.is-active > :nth-child(2) { transition-delay: 0.23s; }
-.cs-story.is-active > :nth-child(3) { transition-delay: 0.31s; }
+.cs-shot {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out);
+}
+.cs-shot.is-active {
+  opacity: 1;
+}
+.cs-shot .story-photo-img:not(.story-photo-blur) {
+  transform: scale(1.06);
+  transition: transform 1.4s var(--ease-out);
+}
+.cs-shot.is-active .story-photo-img:not(.story-photo-blur) {
+  transform: none;
+}
+.cs-shot .story-who {
+  opacity: 0;
+  translate: 0 10px;
+  transition:
+    opacity 0.3s var(--ease-out),
+    translate 0.3s var(--ease-out);
+}
+.cs-shot.is-active .story-who {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.6s var(--ease-out) 0.3s,
+    translate 0.6s var(--ease-out) 0.3s;
+}
+.cs-stories {
+  display: grid;
+}
+.cs-story {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
+  transition: visibility 0s 0.25s;
+}
+.cs-story.is-active {
+  visibility: visible;
+  transition: none;
+}
+.cs-story > * {
+  opacity: 0;
+  translate: 0 12px;
+  transition:
+    opacity 0.25s var(--ease-out),
+    translate 0.25s var(--ease-out);
+}
+.cs-story.is-active > * {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.6s var(--ease-out),
+    translate 0.6s var(--ease-out);
+}
+.cs-story.is-active > :nth-child(1) {
+  transition-delay: 0.15s;
+}
+.cs-story.is-active > :nth-child(2) {
+  transition-delay: 0.23s;
+}
+.cs-story.is-active > :nth-child(3) {
+  transition-delay: 0.31s;
+}
 /* only the foot carries the name, so the blur and tint are along the bottom only */
 .cs-photo-blur {
   -webkit-mask-image: linear-gradient(
@@ -3686,27 +3874,90 @@ html[data-results="2"] .results-v2 {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cs-shot .story-photo-img, .cs-story > *, .cs-shot .story-who { transform: none !important; translate: none !important; }
+  .cs-shot .story-photo-img,
+  .cs-story > *,
+  .cs-shot .story-who {
+    transform: none !important;
+    translate: none !important;
+  }
 }
 /* the compliance row under the stories (Figma 541:3250): four equal columns divided by dashed
  * hairlines, each a 73px mark over its name and a check — white while the page is dark, ink
  * once it turns light (the row sits at the section's foot, where the light theme takes over) */
-.compliance { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 40px 0 0; padding: 0; list-style: none; }
-.compliance li { display: flex; flex-direction: column; align-items: center; padding: 20px; }
-.compliance li + li { border-left: 1px dashed rgba(255, 255, 255, 0.2); }
-.compliance-mark { display: grid; place-items: center; width: 73px; height: 73px; }
-.compliance-mark img { height: auto; filter: brightness(0) invert(1); opacity: 0.9; }
-.compliance-name { display: inline-flex; align-items: center; gap: 5px; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--on-dark, #eef1ef); }
-.compliance-check { width: 16px; height: 16px; filter: brightness(0) invert(1); opacity: 0.75; }
-.compliance li, .compliance-name, .compliance-mark img, .compliance-check { transition: color var(--theme-ms, 700ms) ease, border-color var(--theme-ms, 700ms) ease, filter var(--theme-ms, 700ms) ease; }
-html[data-theme="light"] .compliance li + li { border-left-color: rgba(13, 20, 17, 0.2); }
-html[data-theme="light"] .compliance-name { color: var(--ink); }
-html[data-theme="light"] .compliance-mark img, html[data-theme="light"] .compliance-check { filter: brightness(0); }
+.compliance {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.compliance li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+.compliance li + li {
+  border-left: 1px dashed rgba(255, 255, 255, 0.2);
+}
+.compliance-mark {
+  display: grid;
+  place-items: center;
+  width: 73px;
+  height: 73px;
+}
+.compliance-mark img {
+  height: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+.compliance-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--on-dark, #eef1ef);
+}
+.compliance-check {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+  opacity: 0.75;
+}
+.compliance li,
+.compliance-name,
+.compliance-mark img,
+.compliance-check {
+  transition:
+    color var(--theme-ms, 700ms) ease,
+    border-color var(--theme-ms, 700ms) ease,
+    filter var(--theme-ms, 700ms) ease;
+}
+html[data-theme="light"] .compliance li + li {
+  border-left-color: rgba(13, 20, 17, 0.2);
+}
+html[data-theme="light"] .compliance-name {
+  color: var(--ink);
+}
+html[data-theme="light"] .compliance-mark img,
+html[data-theme="light"] .compliance-check {
+  filter: brightness(0);
+}
 @media (max-width: 640px) {
-  .compliance { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .compliance li:nth-child(3) { border-left: 0; }
-  .compliance li:nth-child(n + 3) { border-top: 1px dashed rgba(255, 255, 255, 0.2); }
-  html[data-theme="light"] .compliance li:nth-child(n + 3) { border-top-color: rgba(13, 20, 17, 0.2); }
+  .compliance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .compliance li:nth-child(3) {
+    border-left: 0;
+  }
+  .compliance li:nth-child(n + 3) {
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+  }
+  html[data-theme="light"] .compliance li:nth-child(n + 3) {
+    border-top-color: rgba(13, 20, 17, 0.2);
+  }
 }
 
 /* ── 5 Start focused ─────────────────────────────────────────────────────── */
@@ -4190,12 +4441,29 @@ html[data-roadmap="2"] .roadmap-v2 {
 /* Version 2 (html[data-faq="2"], review button): the heading on top with Expand all at the
  * far right of its row, and the questions as cards in two columns below — each opens in
  * place (its neighbour keeps its height) */
-html[data-faq="2"] .faq-grid { grid-template-columns: 1fr; row-gap: var(--head-gap, 56px); }
-html[data-faq="2"] .faq-head { position: static; flex-direction: row; align-items: flex-end; justify-content: space-between; }
-html[data-faq="2"] .faq-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 12px 16px; }
+html[data-faq="2"] .faq-grid {
+  grid-template-columns: 1fr;
+  row-gap: var(--head-gap, 56px);
+}
+html[data-faq="2"] .faq-head {
+  position: static;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+html[data-faq="2"] .faq-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px 16px;
+}
 @media (max-width: 900px) {
-  html[data-faq="2"] .faq-list { grid-template-columns: 1fr; }
-  html[data-faq="2"] .faq-head { align-items: center; }
+  html[data-faq="2"] .faq-list {
+    grid-template-columns: 1fr;
+  }
+  html[data-faq="2"] .faq-head {
+    align-items: center;
+  }
 }
 .faq-list {
   display: flex;
@@ -4281,7 +4549,20 @@ html[data-faq="2"] .faq-list { display: grid; grid-template-columns: repeat(2, m
 }
 .faq-ic--small::before,
 .faq-ic--small::after {
-  width: 11px;
+  width: 14px;
+  height: 1.75px;
+}
+/* the secondary buttons' icons, a size up (Oct 8): the arrow in "See how we work" and the
+ * play mark in "Watch the film" (the Expand all plus is .faq-ic--small, above) */
+.btn-glass .btn-ic {
+  display: inline-block;
+  flex-shrink: 0;
+  font-size: 19px;
+  line-height: 1;
+}
+.btn-glass svg.btn-ic {
+  width: 15px;
+  height: 15px;
 }
 
 /* The answer grows and folds (Square: 0.3s, quick then settling, starting 90ms after the

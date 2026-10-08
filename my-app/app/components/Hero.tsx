@@ -161,14 +161,14 @@ const TILES: Array<{ t: Tile; d: [number, number]; m: [number, number] | null }>
   { t: { kind: 'stat', value: '150+', label: 'Person AI CoE' }, d: [21.9, B], m: null },
   { t: { kind: 'stage', k: 'enable', label: 'Enable' }, d: [43.8, B], m: [32, -26] }, // swapped with 150+, Oct 6
 
-  { t: { kind: 'stage', k: 'run', label: 'Run' }, d: [-43.8, C], m: null },
+  { t: { kind: 'stage', k: 'accelerate', label: 'Accelerate' }, d: [-43.8, C], m: null }, // swapped with Run, Oct 7
   { t: { kind: 'competency', src: '/assets/partners/aws-ai-ink.svg' }, d: [-21.9, C], m: [-32, 27] }, // AWS AI Services Competency
   { t: { kind: 'video' }, d: [0, C], m: [0, 27] },
   { t: { kind: 'service', name: 'Agentic AI', label: 'Consulting services' }, d: [21.9, C], m: null }, // the AI Services competency's two services, as tiles
   { t: { kind: 'service', name: 'Generative AI', label: 'Consulting services' }, d: [43.8, C], m: null },
 
   { t: { kind: 'photo', src: '/assets/support-team.jpg', pos: '30% 50%' }, d: [-32.85, D], m: null }, // the team photo (Oct 6, back from row 2)
-  { t: { kind: 'stage', k: 'accelerate', label: 'Accelerate' }, d: [-10.97, D], m: [-16, 41] },
+  { t: { kind: 'stage', k: 'run', label: 'Run' }, d: [-10.97, D], m: [-16, 41] },
   { t: { kind: 'stat', value: '250+', label: 'Products' }, d: [10.97, D], m: null },
   { t: { kind: 'competency', src: '/assets/partners/aws-devops-ink.svg' }, d: [32.85, D], m: [16, 41] },
 ];
@@ -579,7 +579,7 @@ export default function Hero() {
               {CTA_LABEL}
             </a>
             <a href="#flywheel" className="btn-glass" tabIndex={docked ? 0 : -1}>
-              See how we work <span aria-hidden>↓</span>
+              See how we work <span className="btn-ic" aria-hidden>↓</span>
             </a>
           </div>
         </div>
@@ -627,7 +627,7 @@ export default function Hero() {
               aria-haspopup="dialog"
               tabIndex={docked ? -1 : 0}
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+              <svg className="btn-ic" width="15" height="15" viewBox="0 0 12 12" aria-hidden>
                 <path d="M2 1l9 5-9 5V1z" fill="currentColor" />
               </svg>
               {HERO.filmLabel}

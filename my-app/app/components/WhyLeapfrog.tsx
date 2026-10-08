@@ -349,6 +349,14 @@ export default function WhyLeapfrog() {
       <div className="why-v2">
         <WhyStory />
       </div>
+
+      {/* version 3 — the same story inside the page width, numbered as reasons 1-2-3 and tied
+          to its picture (html[data-why="3"]) */}
+      <div className="why-v3">
+        <div className="wrap">
+          <WhyStory numbered />
+        </div>
+      </div>
     </section>
   );
 }
@@ -359,7 +367,20 @@ export default function WhyLeapfrog() {
  * scene crossfades to the pillar in the middle of the screen (Bayshore plays a Lottie per
  * step; ours are the same three scenes as version 1). */
 
-function WhyStory() {
+/* Version 3 (html[data-why="3"], review button; Oct 8): version 2 brought inside the page
+ * width, so the text and its picture read as one unit on large screens, with the three
+ * pillars set as our 1-2-3 reasons. Each step: "Reason 1 of 3" (as the eyebrow), the title
+ * (40px), the text and three key points (from the text); its text starts level with the
+ * picture, whose caption names the same reason ("Reason 1 · Deep AI expertise"). Greys and
+ * ink only, as the headings and eyebrows. ≤900px: as version 2, each picture under its
+ * step, the numbering kept. */
+const REASON_POINTS: Record<string, string[]> = {
+  expertise: ['500+ AI-accelerated experts', '150+ person AI Center of Excellence', 'HIPAA, privacy and security built in'],
+  attention: ['The people you meet deliver', 'Decisions in days', 'Your team scales when the work does'],
+  results: ['The success metric agreed first', 'First use case live in weeks', 'Every AI-assisted line reviewed'],
+};
+
+function WhyStory({ numbered = false }: { numbered?: boolean }) {
   const three = PILLARS.slice(0, 3);
   const [active, setActive] = useState(0);
   const [inView, setInView] = useState(false);
@@ -416,8 +437,22 @@ function WhyStory() {
             data-tone={TONE[p.key]}
             className={`why-story-step${i === active ? ' is-active' : ''}`}
           >
+            {numbered && (
+              <p className="why-eyebrow why3-kicker">
+                Reason {i + 1} of {three.length}
+              </p>
+            )}
             <h3>{p.title}</h3>
             <p className="why-story-body">{p.body}</p>
+            {numbered && (
+              <>
+                <ul className="why3-points">
+                  {REASON_POINTS[p.key]?.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </>
+            )}
             {/* stacked (≤900px): this step's picture, under its text */}
             <div className="why-story-media" data-i={i}>
               {stacked && (
@@ -432,6 +467,18 @@ function WhyStory() {
 
       {!stacked && (
         <div className="why-story-visual">
+          {/* version 3: the picture's caption, the same reason as the open step */}
+          {numbered && (
+            <div className="why3-caption" aria-hidden="true">
+              <span className="why3-caption-text">
+                {three.map((p, i) => (
+                  <span key={p.key} className={i === active ? 'is-active' : undefined}>
+                    <b>Reason {i + 1}</b> · {p.title}
+                  </span>
+                ))}
+              </span>
+            </div>
+          )}
           <div className="why-stage">
             {three.map((p, i) => (
               <Scene key={p.key} p={p} open={i === active} inView={inView} />

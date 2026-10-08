@@ -177,6 +177,12 @@ body.fw-locked { overflow: hidden; }
   text-wrap: balance;
 }
 .fw-promise strong { color: var(--brand-ink); font-weight: 650; }
+/* the header's spacing, as the other sections' heads (Oct 8): the line under the heading
+ * 20px below it, as their leads sit; the promise line set apart from it (32px), so the two
+ * read as separate thoughts */
+.fw-head { gap: 0; }
+.fw-head .fw-pain { margin-top: 20px; }
+.fw-head .fw-head-promise { margin-top: 32px; }
 
 /* ── Stage grid ───────────────────────────────────────────── */
 
@@ -514,22 +520,21 @@ body.fw-locked { overflow: hidden; }
 }
 .fw-modal.open .sweep { transform: scaleX(1); }
 
+/* the close, previous and next buttons are the page's secondary buttons (.btn-glass,
+ * globals.css; Oct 8): close as a round one */
 .d-close {
   position: absolute;
   top: 14px;
   right: 14px;
   width: 44px;
+  min-height: 44px;
   height: 44px;
-  display: grid;
-  place-items: center;
-  border: 0;
+  padding: 0;
   border-radius: 50%;
-  background: transparent;
   color: var(--ink-2);
   cursor: pointer;
-  transition: background-color 0.2s var(--ease-out);
 }
-.d-close:hover { background: rgba(13, 20, 17, 0.06); }
+.d-close:hover { color: var(--ink); }
 .d-close svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
 
 .d-stage {
@@ -595,28 +600,31 @@ body.fw-locked { overflow: hidden; }
 }
 .d-cta:hover { background: var(--brand-ink); }
 .d-cta:active { transform: translateY(1px); }
-.d-proof { font-size: 14px; color: var(--ink-3); }
+/* the stage's example, labelled (outcome, offering or benefit): a tinted callout with a
+ * rule in the stage colour, between "What you get" and the button */
+.d-proof-wrap {
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border-left: 3px solid var(--sec);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: color-mix(in oklab, var(--sec-soft) 60%, transparent);
+}
+.d-plabel {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sec-ink);
+}
+.d-proof { margin: 0; font-size: 16px; line-height: 1.45; color: var(--ink); text-wrap: pretty; }
 .d-nav {
   display: flex;
   justify-content: space-between;
   padding-top: 16px;
   border-top: 1px solid var(--glass-hairline);
 }
-.d-nav button {
-  min-height: 44px;
-  padding: 0 10px;
-  margin: 0 -10px;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--ink-2);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
-}
-.d-nav button:hover { background: rgba(13, 20, 17, 0.05); color: var(--ink); }
+.d-nav button { min-height: 44px; padding: 0 18px; font-size: 15px; cursor: pointer; }
 
 .fw-rise { opacity: 0; transform: translateY(10px); }
 .fw-modal.open .fw-rise { animation: fw-rise 0.45s var(--ease-out) forwards; }
@@ -626,7 +634,7 @@ body.fw-locked { overflow: hidden; }
 
 @media (min-width: 821px) {
   /* everything around the ring at 80%; the ring itself keeps its size */
-  .fw-head, .panel, .fw-core, .fw-dialog { zoom: 0.8; }
+  .fw-head, .panel, .fw-core { zoom: 0.8; } /* the dialog stays full size (Oct 8) */
   .ring-label { padding: 6px 10px; font-size: clamp(9px, calc(var(--ring-px, 440px) * 0.0216), 11.2px); }
   .ring-label::after { inset: -10px; }
   /* side panels share one column each (01 over 05, 02 over 03) and sit close to the ring */
@@ -646,19 +654,18 @@ body.fw-locked { overflow: hidden; }
 }
 
 @media (min-width: 821px) and (max-height: 760px) {
-  .fw-head { gap: 6px; }
   .panel-items { gap: 3px; }
 }
 
-/* Version 1 (the default, no html[data-fw]), Oct 6: full size — the header and the cards
+/* Version 1 (no html[data-fw]; version 6 shares its layout), Oct 6: full size — the header and the cards
  * are not zoomed down, each card's points sit on one line (the card is as wide as its
  * longest point), and the heading keeps the page's usual gap above the ring (--head-gap,
  * as the other sections' heads). The section may run taller than one screen. */
 @media (min-width: 821px) {
-  html:not([data-fw]) .fw-head, html:not([data-fw]) .panel { zoom: 1; }
-  html:not([data-fw]) .fw { height: auto; min-height: 100svh; }
-  html:not([data-fw]) .fw-head { padding-top: clamp(80px, 10svh, 100px); padding-bottom: var(--head-gap, clamp(48px, 5.5vw, 80px)); } /* a tighter top: just clear of the site header */
-  html:not([data-fw]) .fw-stage {
+  html:is(:not([data-fw]), [data-fw="6"]) :is(.fw-head, .panel, .fw-core) { zoom: 1; }
+  html:is(:not([data-fw]), [data-fw="6"]) .fw { height: auto; min-height: 100svh; }
+  html:is(:not([data-fw]), [data-fw="6"]) .fw-head { padding-top: clamp(80px, 10svh, 100px); padding-bottom: var(--head-gap, clamp(48px, 5.5vw, 80px)); } /* a tighter top: just clear of the site header */
+  html:is(:not([data-fw]), [data-fw="6"]) .fw-stage {
     --slot-w: min(36vw, 64svh);
     --acc-lift: clamp(60px, 8.5svh, 90px); /* how far the bottom card sits up; the stage gives the same back at its foot */
     margin-bottom: calc(-1 * var(--acc-lift));
@@ -667,16 +674,19 @@ body.fw-locked { overflow: hidden; }
   }
   /* the ring a little higher, nearer the heading: its slot gives up some height at the foot
    * (the ring is centred in it, so it rises by half of that) */
-  html:not([data-fw]) .fw-slot { margin-bottom: clamp(56px, 8svh, 96px); }
-  html:not([data-fw]) .panel-items > span { white-space: nowrap; }
+  html:is(:not([data-fw]), [data-fw="6"]) .fw-slot { margin-bottom: clamp(56px, 8svh, 96px); }
+  /* version 6: the stage up by the empty space above the ring, so the ring's top edge is
+   * --head-gap under the promise line, as other sections' content under their heads (Oct 8) */
+  html[data-fw="6"] .fw-stage { margin-top: calc(-1 * var(--ring-pull, 0px)); }
+  html:is(:not([data-fw]), [data-fw="6"]) .panel-items > span { white-space: nowrap; }
   /* the side cards share their column's width, so each pair matches */
-  html:not([data-fw]) .panel[data-k="validate"], html:not([data-fw]) .panel[data-k="run"],
-  html:not([data-fw]) .panel[data-k="build"], html:not([data-fw]) .panel[data-k="enable"] { width: min(100%, 340px); max-width: none; }
+  html:is(:not([data-fw]), [data-fw="6"]) .panel[data-k="validate"], html:is(:not([data-fw]), [data-fw="6"]) .panel[data-k="run"],
+  html:is(:not([data-fw]), [data-fw="6"]) .panel[data-k="build"], html:is(:not([data-fw]), [data-fw="6"]) .panel[data-k="enable"] { width: min(100%, 340px); max-width: none; }
   /* the bottom card laid out as the other four (icon and title on top, the points below,
    * then View details) instead of the wide two-column version, and as wide as they are */
-  html:not([data-fw]) .panel[data-k="accelerate"] { display: flex; width: min(100%, 340px); top: calc(-1 * var(--acc-lift)); } /* up, ~40px under the ring; shifted, so the ring's rows don't change */
-  html:not([data-fw]) .panel[data-k="accelerate"] .panel-items,
-  html:not([data-fw]) .panel[data-k="accelerate"] .panel-more { grid-column: auto; grid-row: auto; align-self: auto; }
+  html:is(:not([data-fw]), [data-fw="6"]) .panel[data-k="accelerate"] { display: flex; width: min(100%, 340px); top: calc(-1 * var(--acc-lift)); } /* up, ~40px under the ring; shifted, so the ring's rows don't change */
+  html:is(:not([data-fw]), [data-fw="6"]) .panel[data-k="accelerate"] .panel-items,
+  html:is(:not([data-fw]), [data-fw="6"]) .panel[data-k="accelerate"] .panel-more { grid-column: auto; grid-row: auto; align-self: auto; }
 }
 
 /* ── Tablet / phone ───────────────────────────────────────── */
@@ -903,7 +913,7 @@ html[data-fw="2"] .fw-panels.is-seen .panel:nth-child(5) { transition-delay: 0.3
 
 @media (min-width: 821px) {
   /* full size: the header and cards are not zoomed down */
-  html[data-fw="2"] .fw-head, html[data-fw="2"] .panel { zoom: 1; }
+  html[data-fw="2"] :is(.fw-head, .panel, .fw-core) { zoom: 1; }
   html[data-fw="2"] .fw { height: auto; min-height: 100svh; }
   html[data-fw="2"] .fw-chips { display: contents; }
 
@@ -1173,4 +1183,58 @@ html[data-fw="5"][data-theme="dark"] .ring-label.is-hot, html[data-fw="5"][data-
   background: color-mix(in oklab, var(--sec) 70%, black);
   border-color: rgba(255, 255, 255, 0.5);
   color: #fff;
+}
+
+/* ── Version 6 (html[data-fw="6"], the default from Oct 8) ─────────────────
+ * Version 1's layout; each card names its stage and service, then carries one benefit
+ * in place of the points. While the mouse rests on a stage, its card shows that it is
+ * about to open (.is-charging, flywheel.js): "View details" turns to "Opening", a ring
+ * fills where the arrow was, and a bar in the stage colour runs along the card's foot —
+ * both over the 0.75s before the details open. Elsewhere these pieces stay hidden. */
+.panel-benefit, .panel-more-opening, .panel-ring, .panel-bar { display: none; }
+html[data-fw="6"] .panel-items { display: none; }
+html[data-fw="6"] .panel-benefit {
+  display: block;
+  font-size: clamp(17px, 1.35vw, 19px);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+html[data-fw="6"] .panel-title { font-size: 14px; font-weight: 500; letter-spacing: 0; color: var(--ink-3); }
+html[data-fw="6"] .panel-more { opacity: 0.75; transition: opacity 0.2s var(--ease-out); }
+html[data-fw="6"] :is(.panel:hover, .panel.is-hot, .panel.is-charging) .panel-more { opacity: 1; }
+html[data-fw="6"] .panel-ring { width: 14px; height: 14px; fill: none; stroke-width: 2; }
+html[data-fw="6"] .panel-ring circle { stroke: color-mix(in oklab, var(--sec) 25%, transparent); }
+html[data-fw="6"] .panel-ring .prog {
+  stroke: var(--sec-ink);
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+html[data-fw="6"] .panel-bar {
+  display: block;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, color-mix(in oklab, var(--sec) 70%, white), var(--sec));
+  transform: scaleX(0);
+  transform-origin: left;
+}
+html[data-fw="6"] .panel.is-charging .panel-more-lbl:not(.panel-more-opening),
+html[data-fw="6"] .panel.is-charging .arr { display: none; }
+html[data-fw="6"] .panel.is-charging .panel-more-opening { display: inline; }
+html[data-fw="6"] .panel.is-charging .panel-ring { display: block; }
+html[data-fw="6"] .panel.is-charging .panel-ring .prog { animation: fw-charge 0.75s linear forwards; }
+html[data-fw="6"] .panel.is-charging .panel-bar { animation: fw-charge-bar 0.75s linear forwards; }
+@keyframes fw-charge { to { stroke-dashoffset: 0; } }
+@keyframes fw-charge-bar { to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) {
+  html[data-fw="6"] .panel.is-charging .panel-ring .prog { stroke-dashoffset: 0; }
+  html[data-fw="6"] .panel.is-charging .panel-bar { transform: scaleX(1); }
 }

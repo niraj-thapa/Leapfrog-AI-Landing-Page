@@ -29,30 +29,35 @@ const PANELS = [
   {
     k: 'validate', side: 'l', step: '01 · Validate', title: 'AI-Driven Design',
     href: 'https://design.lftechnology.com/', external: true,
+    benefit: 'Rapidly shape what’s next',
     lead: 'Know what’s worth building: AI discovery and roadmaps, clickable prototypes, user research and brand assets.',
     items: ['AI discovery and roadmaps', 'Clickable prototypes', 'User research and brand assets'],
     icon: (<><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3" /><path d="M7.5 14h9" /></>),
   },
   {
     k: 'build', side: 'r', step: '02 · Build', title: 'AI Solutions', href: '/solutions',
+    benefit: 'Build the AI you can’t buy',
     lead: 'Build the AI you can’t buy: industry accelerators, agentic workflows and customer-facing AI assistants.',
     items: ['Industry accelerators', 'Agentic workflows', 'Customer-facing AI assistants'],
     icon: (<><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" /><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5" /></>),
   },
   {
     k: 'enable', side: 'r', step: '03 · Enable', title: 'AI Enablement', href: '/enablement',
+    benefit: 'Get every team using AI',
     lead: 'Put everyday AI to work for your teams: Claude rollouts live in 30 days, custom skills and connectors, role-based training.',
     items: ['Claude rollouts, live in 30 days', 'Custom skills and MCP connectors', 'Role-based training and governance'],
     icon: (<><circle cx="9" cy="8" r="3.2" /><path d="M3 20a6 6 0 0 1 12 0" /><path d="M15.5 5.2a3.2 3.2 0 0 1 0 5.6" /><path d="M18 14.5a6 6 0 0 1 3 5.5" /></>),
   },
   {
     k: 'accelerate', side: 'b', step: '04 · Accelerate', title: 'AI-Native Engineering', href: '/engineering',
+    benefit: 'Ship software faster with AI',
     lead: 'Help your engineers ship faster: forward-deployed engineers, AI-driven test automation and AI-accelerated practices.',
     items: ['Forward-deployed engineers', 'AI-driven test automation', 'AI-accelerated development practices'],
     icon: <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" />,
   },
   {
     k: 'run', side: 'l', step: '05 · Run', title: 'AI Managed Services', href: '/managed-services',
+    benefit: 'Keep AI reliable and improving',
     lead: 'Keep AI reliable as it spreads: monitoring and evaluation, security and cost control, monthly tuning.',
     items: ['Monitoring and evaluation', 'Security, governance and cost control', 'Usage analytics and monthly tuning'],
     icon: (<><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M9 12l2 2 4-4" /></>),
@@ -84,11 +89,17 @@ const WHEEL_ALT =
  * A choice by the visitor (a pill or the ring) holds that stage for 8s, then the
  * colour flows on from there. No arrows; the header's promise line sits above the list
  * instead (left-aligned). The cards hold still while the section arrives and its items
- * rise in (TileFlight: .is-flight / .is-assembling), then catch up with the colour. */
+ * rise in (TileFlight: .is-flight / .is-assembling), then catch up with the colour.
+ *
+ * Version 6 (html[data-fw="6"], the default from Oct 8): version 1's layout, each card
+ * carrying one benefit ("Rapidly shape what's next") instead of its points. Resting the
+ * mouse on a card (or its ring label or segment) shows it is about to open — a ring fills
+ * beside "Opening" and a bar runs along the card's foot — and after 0.75s its details
+ * open (flywheel.js). Moving off cancels; a click opens at once. */
 /* the promise line: under the heading (versions 1–3), above the list (versions 4–5) */
 const PROMISE = (
   <>
-    Our <strong>AI flywheel</strong> turns quick wins into momentum that builds across your business.
+    We build the <strong>AI Flywheel</strong> that starts with quick wins and keeps compounding results across your business.
   </>
 );
 
@@ -361,9 +372,20 @@ export default function Flywheel() {
                     <span key={i}>{i}</span>
                   ))}
                 </span>
+                {/* version 6: the stage's one benefit in place of the points */}
+                <span className="panel-benefit">{p.benefit}</span>
                 <span className="panel-more">
-                  View details <span className="arr" aria-hidden="true">→</span>
+                  <span className="panel-more-lbl">View details</span>
+                  <span className="panel-more-lbl panel-more-opening" aria-hidden="true">Opening</span>
+                  <span className="arr" aria-hidden="true">→</span>
+                  {/* version 6: while the pointer rests on the card, this ring fills and the
+                      bar runs along the card's foot, then the details open (flywheel.js) */}
+                  <svg className="panel-ring" viewBox="0 0 16 16" aria-hidden="true">
+                    <circle cx="8" cy="8" r="6" />
+                    <circle className="prog" cx="8" cy="8" r="6" pathLength="1" />
+                  </svg>
                 </span>
+                <span className="panel-bar" aria-hidden="true" />
               </a>
             ))}
           </div>
@@ -381,7 +403,7 @@ export default function Flywheel() {
       <div className="fw-modal" id="fw-modal" hidden>
         <div className="fw-dialog" id="fw-dialog" role="dialog" aria-modal="true" aria-labelledby="d-headline">
           <span className="sweep" aria-hidden="true" />
-          <button type="button" className="d-close" id="d-close" aria-label="Close">
+          <button type="button" className="btn-glass d-close" id="d-close" aria-label="Close">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
           <p className="d-stage fw-rise" id="d-stage" />
@@ -391,15 +413,19 @@ export default function Flywheel() {
             <p className="d-label">What you get</p>
             <div className="d-ex" id="d-ex" />
           </div>
+          {/* an example outcome, offering or benefit, labelled as which it is */}
+          <div className="d-proof-wrap fw-rise" id="d-proof-wrap">
+            <p className="d-plabel" id="d-plabel" />
+            <p className="d-proof" id="d-proof" />
+          </div>
           <div className="d-cta-row">
             <a className="d-cta" id="d-link" href="#">
               <span id="d-cta" /> <span aria-hidden="true">→</span>
             </a>
-            <span className="d-proof" id="d-proof" />
           </div>
           <nav className="d-nav" aria-label="Flywheel stages">
-            <button type="button" id="d-prev"><span aria-hidden="true">←</span> <span id="d-prev-l" /></button>
-            <button type="button" id="d-next"><span id="d-next-l" /> <span aria-hidden="true">→</span></button>
+            <button type="button" className="btn-glass" id="d-prev"><span className="btn-ic" aria-hidden="true">←</span><span id="d-prev-l" /></button>
+            <button type="button" className="btn-glass" id="d-next"><span id="d-next-l" /><span className="btn-ic" aria-hidden="true">→</span></button>
           </nav>
         </div>
       </div>

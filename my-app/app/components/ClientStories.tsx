@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { CLIENT_STORIES } from '../lib/content';
+import Arrow from './Arrow';
 
 /* Client results V2 (html[data-results="2"], review button): the client stories as tabs,
  * after the Figma "Tab Container" (LF AI Landing Page, node 2111:132), styled as the V1
@@ -101,7 +102,7 @@ export default function ClientStories() {
               <div className="story-foot">
                 <a href={c.href} className="btn-primary story-link">
                   Read full story
-                  <img src="/assets/arrow-up-right.svg" alt="" width={14} height={13} />
+                  <Arrow dir="up-right" />
                 </a>
               </div>
             </div>

@@ -405,6 +405,8 @@ export default function Flywheel() {
 
       <div className="fw-modal" id="fw-modal" hidden>
         <div className="fw-dialog" id="fw-dialog" role="dialog" aria-modal="true" aria-labelledby="d-headline">
+          {/* the content scrolls inside; the frame around it doesn't clip, so the arrows can sit on its edges */}
+          <div className="fw-dialog-body">
           <button type="button" className="btn-glass d-close" id="d-close" aria-label="Close">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
@@ -425,9 +427,12 @@ export default function Flywheel() {
               <span id="d-cta" /> <Arrow />
             </a>
           </div>
+          </div>
+          {/* previous / next stage: round arrow buttons centred on the dialog's left and right edges
+              (Oct 8; were labelled buttons along its foot); their names are set with the stage */}
           <nav className="d-nav" aria-label="Flywheel stages">
-            <button type="button" className="btn-glass" id="d-prev"><Arrow dir="left" className="btn-ic" /><span id="d-prev-l" /></button>
-            <button type="button" className="btn-glass" id="d-next"><span id="d-next-l" /><Arrow className="btn-ic" /></button>
+            <button type="button" className="btn-glass d-arrow d-arrow--prev" id="d-prev" aria-label="Previous stage"><Arrow dir="left" /></button>
+            <button type="button" className="btn-glass d-arrow d-arrow--next" id="d-next" aria-label="Next stage"><Arrow /></button>
           </nav>
         </div>
       </div>

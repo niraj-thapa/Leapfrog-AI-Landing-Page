@@ -35,7 +35,7 @@ export default function Insights() {
                   Read more
                   {/* the circled arrow, inline so it takes the link's brand colour */}
                   <svg className="insight-arrow" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
-                    <circle cx="8" cy="8" r="7.5" stroke="currentColor" />
+                    <circle cx="8" cy="8" r="7.25" stroke="currentColor" strokeWidth="1.25" />
                     <path d="M8.58333 5L8.16625 5.4179L10.3771 7.7H4.5V8.3H10.3771L8.16625 10.5719L8.58333 11L11.5 8L8.58333 5Z" fill="currentColor" />
                   </svg>
                 </a>

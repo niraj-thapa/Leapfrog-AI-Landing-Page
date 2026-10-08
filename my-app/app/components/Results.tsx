@@ -207,7 +207,7 @@ export default function Results() {
               <div className="story-foot">
                 <a href={STORY.href} className="btn-primary story-link">
                   Read full story
-                  <img src="/assets/arrow-up-right.svg" alt="" width={14} height={13} />
+                  <Arrow dir="up-right" />
                 </a>
               </div>
             </div>

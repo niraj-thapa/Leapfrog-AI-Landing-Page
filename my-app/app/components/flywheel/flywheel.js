@@ -155,8 +155,8 @@ function fill(k) {
     box.appendChild(e);
   });
   const i = ORDER.indexOf(k);
-  document.getElementById('d-prev-l').textContent = NAMES[ORDER[(i + 4) % 5]];
-  document.getElementById('d-next-l').textContent = NAMES[ORDER[(i + 1) % 5]];
+  document.getElementById('d-prev').setAttribute('aria-label', 'Previous: ' + NAMES[ORDER[(i + 4) % 5]]);
+  document.getElementById('d-next').setAttribute('aria-label', 'Next: ' + NAMES[ORDER[(i + 1) % 5]]);
   [['d-stage', 0.05], ['d-headline', 0.09], ['d-desc', 0.13], ['d-ex-wrap', 0.15], ['d-proof-wrap', 0.2]].forEach(([id, dl]) => {
     const el = document.getElementById(id);
     el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; el.style.animationDelay = dl + 's';
@@ -183,7 +183,25 @@ function close() {
   setSel(null);
   if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
 }
-const step = n => open(ORDER[(ORDER.indexOf(current) + n + 5) % 5]);
+/* previous / next slide the whole dialog: out toward the side it is leaving, the next stage's
+ * dialog in from the other side (Oct 8). A quick step while one is sliding cancels it and starts afresh. */
+let slideT = 0;
+const step = n => {
+  const k = ORDER[(ORDER.indexOf(current) + n + 5) % 5];
+  const body = dialog;
+  if (reduceMotion.matches || !isOpen()) { open(k); return; }
+  clearTimeout(slideT);
+  body.classList.remove('is-slide-in');
+  body.dataset.dir = n > 0 ? 'next' : 'prev';
+  body.classList.add('is-slide-out');
+  slideT = setTimeout(() => {
+    open(k);
+    body.classList.remove('is-slide-out');
+    void body.offsetWidth;
+    body.classList.add('is-slide-in');
+    slideT = setTimeout(() => body.classList.remove('is-slide-in'), 500);
+  }, 200);
+};
 
 // choosing a stage on the ring or a card opens its dialog — except in version 3, where
 // it opens the stage in the list beside the ring (StageList, fw:pick)

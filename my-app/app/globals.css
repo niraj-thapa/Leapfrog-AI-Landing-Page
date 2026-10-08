@@ -585,7 +585,7 @@ html.js-theme .faq {
   padding: 0 22px;
   border-radius: var(--radius-btn);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600; /* semibold (Oct 8; was 500) */
   line-height: 1;
   white-space: nowrap;
   transition:
@@ -941,6 +941,7 @@ html.hero-dark .header-menu a:hover {
 }
 .mobile-menu a.btn-primary {
   margin-top: 10px;
+  font-weight: 600; /* buttons are semibold (the menu's links are 500) */
 }
 .mobile-menu-label {
   padding: 4px 6px 0;
@@ -2085,21 +2086,26 @@ html.ring-live .tile-fly .ring-glass {
   border-radius: var(--radius-xl) 0 0 var(--radius-xl);
   background: #10161a;
 } /* full-bleed to the right edge: rounded on the left only */
+/* A true crossfade (Oct 8): the scene coming in fades up over the one going out, which stays
+ * whole underneath until it is covered and only then drops away — so the panel never dips to
+ * its dark ground between scenes (both used to fade at once, passing through near-black) */
 .why-scene {
   position: absolute;
   inset: 0;
+  z-index: 0;
   margin: 0;
   opacity: 0;
   visibility: hidden;
   transition:
-    opacity 0.6s var(--ease-out),
+    opacity 0s 0.6s,
     visibility 0s 0.6s;
 }
 .why-scene.is-open {
+  z-index: 1;
   opacity: 1;
   visibility: visible;
   transition:
-    opacity 0.6s var(--ease-out),
+    opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
     visibility 0s;
 }
 .why-photo {
@@ -2480,11 +2486,11 @@ html.ring-live .tile-fly .ring-glass {
   color: #fff;
 }
 .af-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 20px; /* as the Flywheel cards' icons in their 38px tiles (was 18) */
+  height: 20px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.7;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -2992,6 +2998,21 @@ html[data-why="4"] .why-v4 {
  * figure, the quote, the name, the role with the logo — filling the whole panel: the portrait
  * edge to edge, the story in white along the bottom over a progressive blur (a blurred copy
  * of the portrait faded in from ~45% down, under a dark tint), the type a step smaller. */
+/* …and its photo settles as the other scenes' photos do (from 1.06× over 1.6s), so the
+ * background moves the same way whichever reason comes in (Oct 8) */
+.why-scene .why-card--full .why-card-photo {
+  transform: scale(1.06);
+  transition: transform 1.6s var(--ease-out);
+}
+.why-scene.is-open .why-card--full .why-card-photo {
+  transform: scale(1);
+}
+/* the card is the picture here: it comes in with the scene's crossfade, not on its own build */
+.why-scene .why-card.why-card--full,
+.why-scene .why-card.why-card--full > * {
+  opacity: 1;
+  animation: none;
+}
 .why-card.why-card--full {
   inset: 0;
   left: 0;
@@ -4289,8 +4310,8 @@ html[data-roadmap="2"] .roadmap-v2 {
     opacity 0.4s var(--ease-out);
 }
 .stage-tab-icon .stage-glyph {
-  width: 20px;
-  height: 20px;
+  width: 18px; /* half the 36px tile (was 20) */
+  height: 18px;
   background: #fff;
 }
 .stage-tab:hover .stage-tab-icon {
@@ -4433,8 +4454,8 @@ html[data-roadmap="2"] .roadmap-v2 {
   box-shadow: 0 8px 18px -8px var(--sec);
 }
 .stage-glyph {
-  width: 28px;
-  height: 28px;
+  width: 24px; /* half the 48px tile (was 28) */
+  height: 24px;
   background: var(--tone-ink);
   -webkit-mask: var(--icon) center / contain no-repeat;
   mask: var(--icon) center / contain no-repeat;
@@ -4761,11 +4782,18 @@ html[data-faq="2"] .faq-list {
   width: 14px;
   height: 1.75px;
 }
-/* the page's SVG arrow (Arrow.tsx, Oct 8): sits on the text line, never squeezed */
+/* the page's SVG arrow (Arrow.tsx, Oct 8): sits on the text line, never squeezed.
+ * Icon scale (Oct 8), one system across the page: arrows beside 14–15px button and link text
+ * 16px; beside 12px small-caps links 14px; glyphs in square tiles about half the tile
+ * (18–24px); line icons drawn at a 1.6–1.75px stroke */
 svg.arrow {
   flex-shrink: 0;
   vertical-align: -0.125em;
   overflow: visible;
+}
+:is(.btn-primary, .btn-glass, .link-arrow, .d-cta) > svg.arrow {
+  width: 16px;
+  height: 16px;
 }
 /* the secondary buttons' icons, a size up (Oct 8): the arrow in "See how we work" and the
  * play mark in "Watch the film" (the Expand all plus is .faq-ic--small, above) */
@@ -4776,8 +4804,8 @@ svg.arrow {
   line-height: 1;
 }
 .btn-glass svg.btn-ic {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
 }
 
 /* The answer grows and folds (Square: 0.3s, quick then settling, starting 90ms after the

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { CONTACT_HREF, CTA_LABEL, NAV_LINKS, SERVICE_LINKS } from '../lib/content';
+import { getLenis } from '../lib/smooth';
 
 /* Floating pill header — Figma node 2050:4612. Motion matched to squareup.com:
  *  - at the top it behaves like Square's static nav: it scrolls away with the page,
@@ -107,6 +108,24 @@ export default function SiteHeader() {
     }
   }, [servicesOpen, menuOpen]);
 
+  /* the phone menu fills the screen: the page behind holds still while it is open, and
+   * Escape closes it */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const lenis = getLenis();
+    lenis?.stop();
+    const root = document.documentElement;
+    const prev = root.style.overflow;
+    root.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      lenis?.start();
+      root.style.overflow = prev;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
+
   /* Close the dropdown on outside click or Escape. */
   useEffect(() => {
     if (!servicesOpen) return;
@@ -123,7 +142,7 @@ export default function SiteHeader() {
   }, [servicesOpen]);
 
   return (
-    <header ref={headerRef} className="site-header">
+    <header ref={headerRef} className={`site-header${menuOpen ? ' menu-open' : ''}`}>
       <div ref={innerRef} className="site-header-inner">
         <div className="header-pill">
           <a href="/" className="header-logo" aria-label="Leapfrog AI home">
@@ -198,30 +217,34 @@ export default function SiteHeader() {
           </button>
         </div>
 
-        {menuOpen && (
-          <div className="mobile-menu" id="mobile-menu">
-            <span className="mobile-menu-label">Services</span>
-            {SERVICE_LINKS.map((l) => (
-              <a
-                key={l.label}
-                href={l.href}
-                {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                onClick={() => setMenuOpen(false)}
-              >
-                {l.label}
-              </a>
-            ))}
-            {NAV_LINKS.map((l) => (
-              <a key={l.label} href={l.href} onClick={() => setMenuOpen(false)}>
-                {l.label}
-              </a>
-            ))}
+      </div>
+      {/* outside the sliding bar (its transform would pin the sheet to it, not the screen) */}
+      {menuOpen && (
+        <div className="mobile-menu" id="mobile-menu" data-lenis-prevent>
+          <span className="mobile-menu-label">Services</span>
+          {SERVICE_LINKS.map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              onClick={() => setMenuOpen(false)}
+            >
+              {l.label}
+            </a>
+          ))}
+          <span className="mobile-menu-rule" aria-hidden="true" />
+          {NAV_LINKS.map((l) => (
+            <a key={l.label} href={l.href} onClick={() => setMenuOpen(false)}>
+              {l.label}
+            </a>
+          ))}
+          <div className="mobile-menu-foot">
             <a href={CONTACT_HREF} className="btn-primary" onClick={() => setMenuOpen(false)}>
               {CTA_LABEL}
             </a>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </header>
   );
 }

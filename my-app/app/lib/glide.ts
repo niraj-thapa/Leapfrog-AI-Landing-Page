@@ -39,7 +39,11 @@ function listen() {
 }
 
 /** Glide the page to `top`; the duration grows with the distance unless given. */
-export function glideTo(top: number, ms?: number, onDone?: () => void) {
+/* a softer curve for long, scroll-linked moves (the ring's flight back to its tile): gentle at
+ * both ends, no sharp burst in the middle */
+export const sineInOut = (v: number) => (1 - Math.cos(Math.PI * v)) / 2;
+
+export function glideTo(top: number, ms?: number, onDone?: () => void, ease: (v: number) => number = inOut) {
   listen();
   stopGlide();
   const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -57,7 +61,7 @@ export function glideTo(top: number, ms?: number, onDone?: () => void) {
     active = true;
     lenis.scrollTo(goal, {
       duration: duration / 1000,
-      easing: inOut,
+      easing: ease,
       force: true,
       onComplete: () => {
         if (!active) return;
@@ -72,7 +76,7 @@ export function glideTo(top: number, ms?: number, onDone?: () => void) {
   const step = (now: number) => {
     if (!active) return;
     const k = Math.min(1, (now - t0) / duration);
-    window.scrollTo({ top: from + dist * inOut(k), behavior: 'instant' as ScrollBehavior });
+    window.scrollTo({ top: from + dist * ease(k), behavior: 'instant' as ScrollBehavior });
     if (k < 1) raf = requestAnimationFrame(step);
     else {
       stopGlide();

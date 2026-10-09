@@ -24,18 +24,27 @@ export default function ClientStories() {
   const [inView, setInView] = useState(false);
   const [held, setHeld] = useState(false);
   const [still, setStill] = useState(false);
+  const [phone, setPhone] = useState(false); // phones: no auto-advance (Oct 9) — a tab tap changes the story
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setStill(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const phoneMq = window.matchMedia('(max-width: 720px)');
+    const onPhone = () => setPhone(phoneMq.matches);
+    onPhone();
+    phoneMq.addEventListener('change', onPhone);
     const el = ref.current;
-    if (!el) return;
+    if (!el) return () => phoneMq.removeEventListener('change', onPhone);
     const io = new IntersectionObserver(([e]) => setInView(e.intersectionRatio >= 0.4), { threshold: [0, 0.2, 0.4, 0.6, 1] });
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      phoneMq.removeEventListener('change', onPhone);
+    };
   }, []);
 
-  const playing = inView && !held && !still;
+  const auto = !still && !phone;
+  const playing = inView && !held && auto;
   const next = () => setActive((a) => (a + 1) % CLIENT_STORIES.length);
 
   return (
@@ -55,7 +64,7 @@ export default function ClientStories() {
             >
               <img src={c.logo} alt={c.client} style={{ ['--lw' as string]: c.logoW }} />
               <span className="cs-tab-rule" aria-hidden="true">
-                {open && !still && <span key={active} className="cs-tab-fill" style={{ animationDuration: `${DWELL}ms` }} onAnimationEnd={next} />}
+                {open && auto && <span key={active} className="cs-tab-fill" style={{ animationDuration: `${DWELL}ms` }} onAnimationEnd={next} />}
               </span>
             </button>
           );

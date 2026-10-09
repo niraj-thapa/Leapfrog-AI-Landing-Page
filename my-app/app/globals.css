@@ -708,8 +708,8 @@ html[data-theme="dark"] .btn-glass:hover,
   --hdr-tint: rgba(255, 255, 255, 0.38);
   display: flex;
   align-items: center;
-  min-height: 64px;
-  padding: 0 14px 0 12px; /* as theirs: 64px tall, the CTA 36px inside it */
+  min-height: 56px;
+  padding: 0 10px 0 12px; /* as theirs: 64px tall, the CTA 36px inside it */
   border: 0;
   border-radius: calc(
     var(--radius-btn) + 8px
@@ -922,34 +922,70 @@ html.hero-dark .header-menu a:hover {
   border-radius: 50%;
   color: var(--ink);
 }
+/* The phone menu (Oct 9), after squareup.com's: a full-screen white sheet under the header bar
+ * (which stays on top, its toggle now an ×); the services as large links under a small label,
+ * then the other pages, and "Talk to our team" in a bar pinned along the bottom */
 .mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-top: 8px;
-  padding: 16px;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: var(--glass-blur);
-  box-shadow: 0 24px 48px -20px rgba(13, 30, 22, 0.35);
+  padding: calc(var(--header-h) + 12px) 28px 0;
+  background: #fff;
+  overflow-y: auto;
+  animation: mm-in 0.28s var(--ease-out);
 }
-.mobile-menu a {
-  padding: 10px 6px;
-  font-size: 16px;
-  font-weight: 500;
-}
-.mobile-menu a.btn-primary {
-  margin-top: 10px;
-  font-weight: 600; /* buttons are semibold (the menu's links are 500) */
+@keyframes mm-in {
+  from {
+    opacity: 0;
+  }
 }
 .mobile-menu-label {
-  padding: 4px 6px 0;
+  margin: 8px 0 6px;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--ink-3);
+}
+.mobile-menu a:not(.btn-primary) {
+  padding: 9px 0;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.mobile-menu-rule {
+  height: 1px;
+  margin: 16px 0 10px;
+  background: rgba(13, 20, 17, 0.1);
+}
+.mobile-menu-foot {
+  position: sticky;
+  bottom: 0;
+  margin: auto -28px 0;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(13, 20, 17, 0.12);
+  background: #fff;
+}
+.mobile-menu-foot .btn-primary {
+  width: 100%;
+}
+/* while it is open the header bar reads light, whatever the section behind */
+.site-header.menu-open .header-pill {
+  --hdr-tint: rgba(255, 255, 255, 0.9);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+.site-header.menu-open .header-logo img:not(.header-logo-light) {
+  opacity: 1;
+}
+.site-header.menu-open .header-logo .header-logo-light {
+  opacity: 0;
+}
+.site-header.menu-open .header-toggle {
+  color: var(--ink);
 }
 
 /* ── 1 Hero: video → mosaic (after squareup.com) ──────────────────────────────
@@ -964,9 +1000,10 @@ html.hero-dark .header-menu a:hover {
   position: relative;
   /* morph + a brief hold, then it scrolls away with the tiles rising at depth; then
    * straight into the Flywheel (no gap, Oct 6) — its ring flies in as soon as the section appears */
-  /* 145 + the docked hold (Hero.tsx HOLD, 25) */
-  height: 170vh;
-  height: 170svh;
+  /* 120 + the docked hold (Hero.tsx HOLD, 25) — a quarter-screen shorter flight to the
+   * Flywheel (Oct 9; was 145 + 25) */
+  height: 145vh;
+  height: 145svh;
 }
 .hero-pin {
   --T: calc(9.58 * var(--u));
@@ -1200,7 +1237,7 @@ html.hero-dark .header-menu a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: calc(1.2 * var(--u));
+  gap: calc(1.75 * var(--u));
   text-align: center;
   transform: translate(-50%, -50%);
 }
@@ -1278,15 +1315,13 @@ html.hero-dark .header-menu a:hover {
   align-items: center;
   justify-content: center;
   gap: clamp(24px, 4svh, 40px);
-  /* centred in the open space between the header and the badge row (its label + badges
-   * + bottom offset), not in the full screen, so it reads as visually centred */
-  /* + an optical lift: the title's box carries ~0.22 of its size above the capitals, so the
-   * block moves up by that much (twice it in padding, as the block is centred) */
-  padding: var(--header-h) var(--gutter)
-    calc(
-      clamp(24px, 5.5svh, 56px) + 60px + 36px + 0.44 *
-        clamp(44px, min(5.625vw, 9svh), 96px)
-    );
+  /* centred exactly in the open space between the header bar's foot (72px down) and the top of
+   * the partner logos (their bottom offset + the 60px row; 48px on phones) (Oct 9: the old
+   * padding still allowed for the removed "100+ AI initiatives" label and lifted the block,
+   * so it sat ~30px high) */
+  --hero-hdr-foot: 72px;
+  --hero-mq-row: 60px;
+  padding: var(--hero-hdr-foot) var(--gutter) calc(clamp(24px, 5.5svh, 56px) + var(--hero-mq-row));
   text-align: center;
   color: #fff;
   will-change: clip-path;
@@ -5328,7 +5363,7 @@ html.sq-text [data-sq-rise].is-sq-in {
     --header-h: 80px;
   }
   .hero-pin {
-    --T: 25vw;
+    --T: 22vw; /* Square's phone tiles are ~20vw */
     --tile-r: 18px;
   }
   .hero-tile {
@@ -5349,7 +5384,11 @@ html.sq-text [data-sq-rise].is-sq-in {
     padding: 4px;
   }
   .hero-tile--service strong {
-    font-size: 13px;
+    font-size: clamp(
+      11px,
+      3.4vw,
+      13px
+    ); /* fits "Generative AI" in an 80px tile at 320 */
   }
   .hero-tile--service .svc {
     gap: 2px;
@@ -5361,23 +5400,29 @@ html.sq-text [data-sq-rise].is-sq-in {
   .hero-say {
     top: 50%;
     width: calc(100% - 40px);
-    gap: 14px;
+    gap: 20px;
   }
   .hero h1 {
-    font-size: clamp(32px, 9.4vw, 44px);
+    font-size: clamp(34px, 10.2vw, 44px); /* 40px at 390, as Square's */
   } /* keeps each line of the title on one line */
   .hero-statement {
     font-size: clamp(18px, 5vw, 22px);
   }
+  /* the two buttons side by side, as Square's (Oct 9; were stacked full width) */
   .hero-say-actions,
   .hero-actions {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
     width: 100%;
-    max-width: 320px;
+  }
+  .hero-say-actions > *,
+  .hero-actions > * {
+    flex: 0 1 auto;
+    padding-inline: 16px;
   }
   .hero-play {
-    top: calc(50% + 27svh);
+    top: calc(50% + 24svh);
   }
   .marquee li {
     padding: 0 22px;
@@ -5736,5 +5781,143 @@ html.sq-text [data-sq-rise].is-sq-in {
 @media (prefers-reduced-motion: reduce) {
   .vs-panel {
     animation: none;
+  }
+}
+
+/* short phones (iPhone SE): the statement a size down so it clears the tile rows */
+@media (max-width: 720px) and (max-height: 620px) {
+  .hero-statement {
+    font-size: 16px;
+  }
+  .hero-say {
+    gap: 10px;
+  }
+  .hero-say-actions > * {
+    min-height: 40px;
+  }
+}
+
+/* Phones (Oct 9): the reason steps */
+@media (max-width: 900px) {
+  /* the steps keep their top (and bottom) padding but none at the sides: the page's own
+   * gutter (.wrap) already sets the text in; V2 has no .wrap, so its story takes the gutter */
+  .why-story-step,
+  :is(.why-v3, .why-v4) .why-story-step {
+    padding-inline: 0;
+  }
+  .why-v2 .why-story {
+    padding-inline: var(--gutter);
+  }
+  /* the last, Real results faster, has no bottom padding: the section's own carries on */
+  .why-story-step:last-child,
+  :is(.why-v3, .why-v4) .why-story-step:last-child {
+    padding-bottom: 0;
+  }
+}
+
+/* Boutique attention's client card on phones (Oct 9), as V3's card — white, dark type, the logo
+ * in colour — set upright: the client's photo across the top, the figure, the quote, the
+ * name and the role with the logo on white below. V3 and V4 (it was the full-photo card with
+ * the story over a blur). The picture panel is as tall as the card. */
+@media (max-width: 640px) {
+  :is(.why-story-media, .why-item-media) .why-stage:has(.why-card),
+  .why-story-media .why-stage.why-stage:has(.why-card) {
+    height: auto;
+    aspect-ratio: auto;
+    background: #fff;
+  }
+  :is(.why-story-media, .why-item-media) .why-scene:has(.why-card) {
+    position: relative;
+  }
+  :is(.why-story-media, .why-item-media)
+    .why-scene:has(.why-card)
+    :is(.why-photo, .why-shade) {
+    display: none;
+  }
+  :is(.why-story-media, .why-item-media) .why-card,
+  :is(.why-story-media, .why-item-media) .why-card.why-card--full {
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    width: auto;
+    border-radius: inherit;
+    background: #fff;
+    box-shadow: none;
+    transform: none;
+    color: #0d1411;
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-photo {
+    position: static;
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    object-position: 50% 25%;
+    transform: none;
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-photo--blur,
+  :is(.why-story-media, .why-item-media) .why-card::after {
+    display: none;
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-text {
+    position: static;
+    padding: 22px 20px 24px;
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-stat strong {
+    font-size: 30px;
+    color: #0d1411;
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-stat span {
+    font-size: 15px;
+    color: #36423c;
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-quote {
+    margin-top: 14px;
+    font-size: 15.5px;
+    line-height: 1.5;
+    color: #0d1411;
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-name {
+    margin-top: 16px;
+    font-size: 15.5px;
+    color: #0d1411;
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-role {
+    font-size: 13px;
+    color: #56625c;
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-logo {
+    height: 20px;
+    filter: none; /* in its own colours on white */
+  }
+  :is(.why-story-media, .why-item-media) .why-card .why-card-bar {
+    display: none;
+  }
+}
+
+/* Phone tweaks (Oct 9) */
+@media (max-width: 720px) {
+  /* the last working model, "Deliver or operate with us", ends the block: no bottom padding */
+  .support-list > li:last-child {
+    padding-bottom: 0;
+  }
+  /* the section head sits 24px above its story */
+  .why-head {
+    margin-bottom: 24px;
+  }
+  /* each reason's picture 40px under its text */
+  .why-story-media {
+    margin-top: 40px;
+  }
+  /* the client tabs don't advance by themselves on phones, so no progress line under them */
+  .cs-tab-rule {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero-intro {
+    --hero-mq-row: 48px; /* the phone badge row */
   }
 }

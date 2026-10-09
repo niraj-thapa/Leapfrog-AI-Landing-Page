@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { fwFlight } from './flywheel/flywheel';
-import { glideTo, isGliding } from '../lib/glide';
+import { glideTo, isGliding, sineInOut } from '../lib/glide';
+import { addStops } from '../lib/stops';
 import { splitWords } from '../lib/sqText';
 
 /* The ring tile IS the Flywheel (after waabi.ai, where one mosaic tile grows and
@@ -43,9 +44,10 @@ const FLIGHT_START = 1.1;
 const HERO_DOCK = 0.38; // Hero.tsx DOCK
 const HERO_HOLD = 0.25; // Hero.tsx HOLD: the docked tiles hold still this long before moving on
 const SNAP_IDLE = 260;
+const DOWN_FREE = 0.25; // heading down: the glide waits until the visitor has scrolled this much of a viewport past the ring's take-off (the end of the tiles' hold) (Oct 9)
 /* free scroll through the tile parallax first: the snap only takes over once the visitor
  * is this far (in viewports) past the statement */
-const FREE_SCROLL = 0.5;
+const FREE_SCROLL = 0.3; // Oct 9: the glide takes over sooner (was 0.5)
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const span = (p: number, a: number, b: number) => clamp01((p - a) / (b - a));
@@ -72,29 +74,44 @@ export default function TileFlight() {
      * list in versions 4–5). This plays once: after the first landing everything stays put
      * as the ring takes off and lands again (.was-built, flywheel.css) */
     const heads = Array.from(fw.querySelectorAll<HTMLElement>('.fw-title, .fw-pain, .fw-promise'));
-    heads.forEach((h, j) => {
-      splitWords(h);
-      h.style.setProperty('--sq-d', `${[0, 260, 420, 420][j] ?? 0}ms`);
+    /* the title rises word by word; the two lines under it rise as one block each, as the
+     * other sections' leads do ([data-sq-rise], globals.css) (Oct 9) */
+    heads.forEach((h) => {
+      if (h.classList.contains('fw-title')) {
+        splitWords(h);
+        h.style.setProperty('--sq-d', '0ms');
+      } else {
+        h.dataset.sqRise = '';
+      }
     });
     fw.classList.add('head-waits');
-    /* the header reveals after the ring lands, and only while the header is on screen (a page
-     * opened further down plays it as you come back up to it). Before that first landing,
-     * taking off hides it again (the reveal's play-back) */
+    heads.forEach((h) => h.classList.remove('is-sq-in')); // a remount (dev, hot reload) starts hidden again
+    /* the header reveals as it comes on screen (a page opened further down plays it as you
+     * come back up to it), and stays */
     const headEl = fw.querySelector<HTMLElement>('.fw-head');
     let ringLanded = false;
     let headSeen = false;
+    /* as the other sections' headings (RevealController): words rise in as soon as the header
+     * comes on screen, once — no longer waiting for the ring to land (Oct 9) */
+    /* …but not while the docked tiles are still being read: only once the visitor scrolls on
+     * from them toward the Flywheel (the ring's flight has begun, `leftTiles`) */
+    let leftTiles = false;
     const reveal = () => {
-      if (ringLanded && headSeen) heads.forEach((h) => h.classList.add('is-sq-in'));
+      if (headSeen && leftTiles) heads.forEach((h) => h.classList.add('is-sq-in'));
     };
-    const headIo = new IntersectionObserver(([e]) => {
-      headSeen = e.isIntersecting;
-      reveal();
-    });
+    /* "seen" once it is properly on screen — into the top 60%, as the section arrives — not
+     * at its first pixel at the foot of the screen while the ring is still mid-flight (Oct 9) */
+    const headIo = new IntersectionObserver(
+      ([e]) => {
+        headSeen = e.isIntersecting;
+        reveal();
+      },
+      { rootMargin: '0px 0px -40% 0px' },
+    );
     if (headEl) headIo.observe(headEl);
     const showHeads = (on: boolean) => {
       ringLanded = on;
       if (on) reveal();
-      else heads.forEach((h) => h.classList.remove('is-sq-in'));
     };
     const panels = Array.from(fw.querySelectorAll<HTMLElement>('.panel'));
     let raf = 0;
@@ -171,6 +188,10 @@ export default function TileFlight() {
       /* within a pixel of the line counts as landed (a glide's last step can leave a
        * sub-pixel remainder that the browser rounds away) */
       const p = fr.top - landTop < 1 ? 1 : clamp01((startTop - fr.top) / Math.max(1, startTop - landTop));
+      if (p > 0 && !leftTiles) {
+        leftTiles = true;
+        reveal();
+      }
       const a = tile.getBoundingClientRect();
       const tileShown = parseFloat(getComputedStyle(tile).opacity) || 0;
       const tileOnScreen = a.bottom > 0 && a.top < H;
@@ -301,11 +322,11 @@ export default function TileFlight() {
       const landY = y + fw.getBoundingClientRect().top - landTop;
       const dockY = y + hero.getBoundingClientRect().top + HERO_DOCK * H;
       if (y <= dockY + 1 || y >= landY - 1) return;
-      /* each way, the first half-viewport scrolls freely (tile parallax at the visitor's
+      /* each way, the first 0.3 of a viewport scrolls freely (tile parallax at the visitor's
        * pace); stop beyond it and the page glides on in that direction */
       const free = FREE_SCROLL * H;
-      if (dir > 0 && y > dockY + free) glideTo(landY);
-      else if (dir < 0 && y < landY - free) glideTo(dockY);
+      if (dir > 0 && y > dockY + (HERO_HOLD + DOWN_FREE) * H) glideTo(landY); // not as soon as the ring leaves its tile: a little scroll past it first
+      else if (dir < 0 && y < landY - free) glideTo(dockY, 1300, undefined, sineInOut); // back to the tiles: slower and softer, the ring easing home (Oct 9; was ~0.75s, cubic)
     };
     const onScroll = () => {
       const y = window.scrollY;
@@ -321,6 +342,12 @@ export default function TileFlight() {
       if (!reducedMq.matches) snapIdle = window.setTimeout(maybeSnap, SNAP_IDLE);
     };
     const reducedMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    /* however hard the visitor flicks down from the hero, the page stops at the docked tiles
+     * ("Put AI to work…" and its calls to action) — lib/stops.ts */
+    const removeStops = addStops(() => {
+      const hero = document.getElementById('top');
+      return hero ? [window.scrollY + hero.getBoundingClientRect().top + HERO_DOCK * window.innerHeight] : [];
+    });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('wheel', onInput, { passive: true });
     window.addEventListener('touchstart', onInput, { passive: true });
@@ -337,6 +364,7 @@ export default function TileFlight() {
       window.removeEventListener('touchmove', onInput);
       window.removeEventListener('keydown', onInput);
       window.removeEventListener('resize', kick);
+      removeStops();
       fwFlight.active = false;
       resetAssembly();
       headIo.disconnect();

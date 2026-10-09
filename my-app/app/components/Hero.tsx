@@ -148,30 +148,35 @@ type Tile =
  * between the second and third rows, the loop landing in the centre of the third.
  * Desktop offsets are from the viewport centre in --u units (1u = 1vw at 16:10;
  * the grid scales down to fit shorter screens). Phone offsets are [vw, svh] from
- * the centre, or null to drop the tile on small screens. */
+ * the centre, or null to drop the tile on small screens. Phones (Oct 9), after Square's
+ * phone mosaic: a stagger of rows of 2 · 3 · 3 · 2 — rows of 2 at ±24vw, rows of 3 at 0 and
+ * ±39vw; rows at −42 / −24svh above the statement and 24 / 42svh below — the ring top centre
+ * and the video bottom centre: Claude · AWS Healthcare | 100+ · ring · 150+ | AWS AI ·
+ * video · Agentic AI | Generative AI · 250+ (Oct 9). The stage tiles, 500+, AWS DevOps and the
+ * team photo are dropped there. */
 const A = -28.6, B = -15, C = 19, D = 32.6; // Square's grid, rows 2–3 opened up around the statement
 const TILES: Array<{ t: Tile; d: [number, number]; m: [number, number] | null }> = [
-  { t: { kind: 'stage', k: 'validate', label: 'Validate' }, d: [-32.85, A], m: [-16, -40] },
+  { t: { kind: 'stage', k: 'validate', label: 'Validate' }, d: [-32.85, A], m: null },
   { t: { kind: 'stat', value: '500+', label: 'AI-accelerated experts' }, d: [-10.97, A], m: null },
-  { t: { kind: 'stage', k: 'build', label: 'Build' }, d: [10.97, A], m: [16, -40] },
-  { t: { kind: 'competency', src: '/assets/partners/aws-healthcare-ink.svg' }, d: [32.85, A], m: null }, // swapped with Build, Oct 6
+  { t: { kind: 'stage', k: 'build', label: 'Build' }, d: [10.97, A], m: null },
+  { t: { kind: 'competency', src: '/assets/partners/aws-healthcare-ink.svg' }, d: [32.85, A], m: [24, -42] }, // swapped with Build, Oct 6
 
-  { t: { kind: 'stat', value: '100+', label: 'AI initiatives led' }, d: [-43.8, B], m: [0, -26] },
-  { t: { kind: 'chip', src: '/assets/partners/claude-select-chip.svg' }, d: [-21.9, B], m: [-32, -26] }, // Claude Partner Network, Select Services Partner (Figma 538:3101); swapped with 100+, Oct 6
-  { t: { kind: 'ring' }, d: [0, B], m: [32, 27] }, // the Flywheel ring, top centre (swapped with the portrait, Oct 4)
-  { t: { kind: 'stat', value: '150+', label: 'Person AI CoE' }, d: [21.9, B], m: null },
-  { t: { kind: 'stage', k: 'enable', label: 'Enable' }, d: [43.8, B], m: [32, -26] }, // swapped with 150+, Oct 6
+  { t: { kind: 'stat', value: '100+', label: 'AI initiatives led' }, d: [-43.8, B], m: [-39, -24] },
+  { t: { kind: 'chip', src: '/assets/partners/claude-select-chip.svg' }, d: [-21.9, B], m: [-24, -42] }, // Claude Partner Network, Select Services Partner (Figma 538:3101); swapped with 100+, Oct 6
+  { t: { kind: 'ring' }, d: [0, B], m: [0, -24] }, // the Flywheel ring, top centre (swapped with the portrait, Oct 4)
+  { t: { kind: 'stat', value: '150+', label: 'Person AI CoE' }, d: [21.9, B], m: [39, -24] },
+  { t: { kind: 'stage', k: 'enable', label: 'Enable' }, d: [43.8, B], m: null }, // swapped with 150+, Oct 6
 
   { t: { kind: 'stage', k: 'accelerate', label: 'Accelerate' }, d: [-43.8, C], m: null }, // swapped with Run, Oct 7
-  { t: { kind: 'competency', src: '/assets/partners/aws-ai-ink.svg' }, d: [-21.9, C], m: [-32, 27] }, // AWS AI Services Competency
-  { t: { kind: 'video' }, d: [0, C], m: [0, 27] },
-  { t: { kind: 'service', name: 'Agentic AI', label: 'Consulting services' }, d: [21.9, C], m: null }, // the AI Services competency's two services, as tiles
-  { t: { kind: 'service', name: 'Generative AI', label: 'Consulting services' }, d: [43.8, C], m: null },
+  { t: { kind: 'competency', src: '/assets/partners/aws-ai-ink.svg' }, d: [-21.9, C], m: [-39, 24] }, // AWS AI Services Competency
+  { t: { kind: 'video' }, d: [0, C], m: [0, 24] },
+  { t: { kind: 'service', name: 'Agentic AI', label: 'Consulting services' }, d: [21.9, C], m: [39, 24] }, // the AI Services competency's two services, as tiles
+  { t: { kind: 'service', name: 'Generative AI', label: 'Consulting services' }, d: [43.8, C], m: [-24, 42] },
 
   { t: { kind: 'photo', src: '/assets/support-team.jpg', pos: '30% 50%' }, d: [-32.85, D], m: null }, // the team photo (Oct 6, back from row 2)
-  { t: { kind: 'stage', k: 'run', label: 'Run' }, d: [-10.97, D], m: [-16, 41] },
-  { t: { kind: 'stat', value: '250+', label: 'Products' }, d: [10.97, D], m: null },
-  { t: { kind: 'competency', src: '/assets/partners/aws-devops-ink.svg' }, d: [32.85, D], m: [16, 41] },
+  { t: { kind: 'stage', k: 'run', label: 'Run' }, d: [-10.97, D], m: null },
+  { t: { kind: 'stat', value: '250+', label: 'Products' }, d: [10.97, D], m: [24, 42] },
+  { t: { kind: 'competency', src: '/assets/partners/aws-devops-ink.svg' }, d: [32.85, D], m: null },
 ];
 
 function TileBody({ t }: { t: Tile }) {
@@ -245,6 +250,10 @@ const driftFor = (_t: Tile, dx: number, dy: number) => {
   const col = Math.abs(dx) >= 30 ? 2 : Math.abs(dx) >= 15 ? 1 : 0; // centre · middle · outer
   return dy < 0 ? [1.0, 1.2, 1.45][col] : [0.45, 0.55, 0.7][col];
 };
+/* phones: the speed steps down row by row (top row fastest), so in the stagger no tile ever
+ * catches the one diagonally above it; rows above the statement outpace it (0.8), rows below
+ * lag it; the ring's row keeps the desktop ring's 1.0 (TileFlight reads that) */
+const phoneDrift = (my: number) => (my <= -40 ? 1.2 : my < 0 ? 1.0 : my <= 30 ? 0.35 : my <= 50 ? 0.25 : 0.2); // rows below: slower (Oct 9: 0.6 / 0.5), less empty space before the Flywheel
 const MORPH = 0.33; // the move completes here…
 const HERO_DARK_UNTIL = 0.3; // morph progress at which the shrinking video clears the header
 const DOCK = 0.38; // …and the glide settles here, so the move ends crisply instead of easing to a stop
@@ -322,6 +331,7 @@ export default function Hero() {
     const wordGoal = (m: number, i: number) => 110 * (1 - easeOut(span(m, wordStart[i], Math.min(1, wordStart[i] + 0.4))));
     const wordY = words.map(() => 110);
 
+    const phoneMq = window.matchMedia('(max-width: 720px)');
     let W = 0, H = 0, run = 1;
     /* docked transform, and the fraction of the frame clipped on each axis */
     let fin = { s: 1, tx: 0, ty: 0, cx: 0, cy: 0, r: 0 };
@@ -382,8 +392,15 @@ export default function Hero() {
         /* depth parallax once docked — after a hold (HOLD of a viewport) where the docked
          * tiles stay still — every tile drifts up at its own rate */
         const par = Math.max(0, px - H * (DOCK + HOLD));
-        const pyVideo = -par * driftFor(TILES[videoIndex].t, TILES[videoIndex].d[0], TILES[videoIndex].d[1]);
-        tiles.forEach((t, i) => t.style.setProperty('--py', `${(-par * driftFor(TILES[i].t, TILES[i].d[0], TILES[i].d[1])).toFixed(1)}px`));
+        /* on phones the drift follows the phone grid (a column moves as one, so its tiles keep
+         * their spacing; rows above the statement outpace it, rows below lag) — the desktop
+         * grid's speeds there made tiles collide */
+        const drift = (i: number) => {
+          const { t, d, m } = TILES[i];
+          return phoneMq.matches && m ? phoneDrift(m[1]) : driftFor(t, d[0], d[1]);
+        };
+        const pyVideo = -par * drift(videoIndex);
+        tiles.forEach((t, i) => t.style.setProperty('--py', `${(-par * drift(i)).toFixed(1)}px`));
         pin.style.setProperty('--py-video', `${pyVideo.toFixed(1)}px`);
         if (say) say.style.translate = `0 ${(-par * SAY_DRIFT).toFixed(1)}px`;
         const s = 1 + (fin.s - 1) * m;

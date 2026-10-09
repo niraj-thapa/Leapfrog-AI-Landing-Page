@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { glideTo } from '../lib/glide';
+import { glideTo, sineInOut } from '../lib/glide';
 
 /* In-page links (#flywheel, #work-together, …) glide to their section instead of
  * jumping: an eased scroll whose length grows with the distance, landing where the
@@ -21,7 +21,11 @@ export default function SmoothAnchors() {
        * scroll-margin (the Flywheel cancels it to sit flush with the top) */
       const pad = (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) + (parseFloat(getComputedStyle(target).scrollMarginTop) || 0);
       const top = target.getBoundingClientRect().top + window.scrollY - pad;
-      glideTo(top, undefined, () => target.focus({ preventScroll: true }));
+      /* slower and softer than a snap (Oct 9): "See how we work" carries the ring's whole flight
+       * from its tile into the Flywheel, which a ~0.8s cubic glide squeezed into a burst */
+      const dist = Math.abs(top - window.scrollY);
+      const ms = Math.min(2200, Math.max(1000, 600 + dist * 1));
+      glideTo(top, ms, () => target.focus({ preventScroll: true }), sineInOut);
     };
     document.addEventListener('click', onClick);
     return () => document.removeEventListener('click', onClick);

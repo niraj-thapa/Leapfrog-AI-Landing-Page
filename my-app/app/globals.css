@@ -1486,11 +1486,11 @@ html.ring-live .tile-fly .ring-glass {
  * integration icons (measured Oct 8): white, a 1px #eeeeed hairline, 6px corners, 6×10
  * padding, 12px medium, centred 12px above the badge, fading in over 0.2s. The marquee
  * leaves room above the row for it (padding-top) and pauses while hovered. */
-.marquee .badge {
+:is(.marquee, .why-partners) .badge {
   position: relative;
   pointer-events: auto;
 }
-.marquee .badge::after {
+:is(.marquee, .why-partners) .badge::after {
   content: attr(data-tooltip);
   position: absolute;
   left: 50%;
@@ -1511,8 +1511,8 @@ html.ring-live .tile-fly .ring-glass {
     transform 0.2s ease;
   pointer-events: none;
 }
-.marquee .badge:hover::after,
-.marquee .badge:focus-visible::after {
+:is(.marquee, .why-partners) .badge:hover::after,
+:is(.marquee, .why-partners) .badge:focus-visible::after {
   opacity: 1;
   transform: translate(-50%, 0);
 }
@@ -1536,7 +1536,7 @@ html.ring-live .tile-fly .ring-glass {
 /* the Claude "Select Services Partner" lockup: near-square, as tall as the AWS badges' artwork */
 .badge-img--lockup {
   height: 62px;
-} /* soc2.svg: its layers raised from 50–82% to full opacity so it reads with the white badges */
+} /* soc2.svg: the Figma seal (Vyaguta Dashboard 575:1020, Oct 8), white */
 .anthropic {
   position: relative;
   display: block;

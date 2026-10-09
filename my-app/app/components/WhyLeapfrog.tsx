@@ -124,7 +124,7 @@ function Scene({ p, open, inView, testimonials = false }: { p: Pillar; open: boo
           <ul className="why-partners" aria-label="Partner credentials">
             {BADGES.map((b) => (
               <li key={b.name}>
-                <a href={b.href} className="badge" title={b.name} aria-label={b.name} tabIndex={open ? 0 : -1}>
+                <a href={b.href} className="badge" aria-label={b.name} data-tooltip={b.name} tabIndex={open ? 0 : -1}>
                   <img src={b.mono} alt="" className={`badge-img badge-img--${b.kind}`} />
                 </a>
               </li>

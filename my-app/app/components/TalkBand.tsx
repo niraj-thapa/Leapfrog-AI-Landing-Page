@@ -14,9 +14,8 @@ import Arrow from './Arrow';
  * while, scrubbed by the scroll:
  *  - the title rises from 120% (quad out) as its letters fade in one by one,
  *    the last word in brand green;
- *  - three rings with a dark → green → dark stroke grow from nothing to a size that keeps two
- *    whole on screen and the third cut by its edges (quad out, the outer ring leading),
- *    drifting up from just below centre;
+ *  - three rings with a dark → green → dark stroke grow from nothing to 1.8×
+ *    (quad out, the outer ring leading), drifting up from just below centre;
  *  - the subline's words fade in as it rises 30px; the button rises out of a mask
  *    (and is invisible while fully lowered).
  * Timings were sampled from the reference at 1440×900 and are expressed in its
@@ -112,15 +111,10 @@ export default function TalkBand() {
       if (title) title.style.transform = `translate3d(0, ${(120 * (1 - quadOut(span(u, 0, 430)))).toFixed(2)}%, 0)`;
       chars.forEach((c, i) => (c.style.opacity = span(u, 10 + i * 22, 60 + i * 22).toFixed(3)));
       /* rings */
-      /* they grow until the outer ring reaches the sides of the window, the other two just
-       * inside it (Oct 8; was 1.8×, which pushed them past the sides, leaving only arcs) */
-      const svg = rings[0]?.ownerSVGElement;
-      const unit = svg ? svg.getBoundingClientRect().width / 1473 : 1;
-      const sEnd = Math.min(1.8, (window.innerWidth / 2 - 2) / (RINGS[0].r * unit)); // the outer ring reaches the window's sides
       rings.forEach((ring, k) => {
         const { lag } = RINGS[k];
-        const s = sEnd * quadOut(span(u, lag, 1440));
-        const ty = 120 * (1 - s / sEnd);
+        const s = 1.8 * quadOut(span(u, lag, 1440));
+        const ty = 120 * (1 - s / 1.8);
         ring.setAttribute('transform', `translate(0 ${ty.toFixed(2)}) translate(${C} ${CY}) scale(${s.toFixed(4)}) translate(${-C} ${-CY})`);
         ring.style.opacity = quadOut(span(u, lag, lag + 400)).toFixed(3);
       });

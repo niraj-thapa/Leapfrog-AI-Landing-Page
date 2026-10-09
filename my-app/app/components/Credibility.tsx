@@ -26,25 +26,22 @@ const COPIES = 3;
 /* Credibility marquee — after the client-logo row along the bottom of
  * squareup.com's hero video. The badges ride inside the hero loop (they shrink
  * with it), flat white like Square's logos (the *-mono.svg artwork), in one slow horizontal loop that pauses on hover or focus.
- * Only the first copy of each badge is a reachable link; the repeats are
- * decorative. Each badge links to its partner profile or trust page.
+ * The badges are not links (Oct 8); each shows its name in a tooltip on hover. Only the first
+ * copy of each is named for screen readers; the repeats are decorative.
  * Reduced motion: the row holds still and shows each badge once. */
-export default function CredibilityMarquee({ tabbable = true }: { tabbable?: boolean }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function CredibilityMarquee(_props: { tabbable?: boolean }) {
   const run = (copy: number) =>
     Array.from({ length: COPIES }, (_, c) =>
       BADGES.map((b) => {
         const real = copy === 0 && c === 0;
         return (
           <li key={`${copy}-${c}-${b.name}`} className={real ? undefined : 'is-repeat'} aria-hidden={real ? undefined : true}>
-            <a
-              href={b.href}
-              className="badge"
-              aria-label={real ? b.name : undefined}
-              data-tooltip={b.name} /* the name in a small tooltip on hover (CSS), as capsulecrm.com's integration icons */
-              tabIndex={real && tabbable ? 0 : -1}
-            >
+            {/* not a link (Oct 8): the badge, named in a small tooltip on hover (CSS), as
+                capsulecrm.com's integration icons */}
+            <span className="badge" role={real ? 'img' : undefined} aria-label={real ? b.name : undefined} data-tooltip={b.name}>
               <img src={b.mono} alt="" className={`badge-img badge-img--${b.kind}`} />
-            </a>
+            </span>
           </li>
         );
       }),

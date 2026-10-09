@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Inter } from 'next/font/google';
+import { VercelToolbar } from '@vercel/toolbar/next';
 import './globals.css';
 import { variantScript } from './lib/variants';
 
@@ -25,7 +26,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* section versions under review (lib/variants.ts): applied before paint, no flash */}
         <script dangerouslySetInnerHTML={{ __html: variantScript() }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* the Vercel Toolbar, so the team can leave comments on the design (it shows only to
+            signed-in members of the Vercel team; visitors see nothing) */}
+        <VercelToolbar />
+      </body>
     </html>
   );
 }

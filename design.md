@@ -654,3 +654,5 @@ Measured on Square at 390×664: a plain hamburger top right; the menu a full-scr
 - Play button and Flywheel ring locked to their tiles through the parallax (Oct 10):
   - Play button: placed with `translate` (not transitioned) and only its scale eases; the transitioned transform trailed the video tile up to ~10px while scrolling. Now 0px.
   - Ring: drawn straight after the hero moves the tiles, in the same frame — Hero's tick calls `__fwFlight.follow()` (TileFlight places the ring) which calls `FL.draw()` (flywheel.js renders); its own frame callback skips the frame it would draw twice. Drawn from its own callback it showed the tile's place a frame late, 3–7px behind. Now 0px on every frame until take-off.
+- Header logo "AI" now #36c37a — the colour of "team" in Talk to our team in the dark theme — fixed, so it is the same in light and dark. Was the lime #79b231 (Oct 10).
+- Body font default now version 2, Geist (Oct 10); the variant set bumped to 6 so every browser starts from the new defaults.

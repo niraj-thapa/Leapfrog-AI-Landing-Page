@@ -33,8 +33,9 @@ export const VARIANT_GROUPS: VariantGroup[] = [
   {
     key: 'font',
     label: 'Body font',
+    default: '2', // chosen Oct 10
     options: [
-      { value: '1', note: 'Tomato Grotesk (current)' },
+      { value: '1', note: 'Tomato Grotesk' },
       { value: '2', note: 'Geist' },
       { value: '3', note: 'Inter' },
     ],
@@ -116,8 +117,8 @@ export const VARIANT_GROUPS: VariantGroup[] = [
 ];
 
 /* the storage key carries a set number: bumping it (Oct 6, the chosen line-up; Oct 8, Flywheel
- * version 6; Oct 8, the sticky header) drops earlier choices, so every browser starts from the defaults above */
-const SET = '5';
+ * version 6; Oct 8, the sticky header; Oct 10, Geist body) drops earlier choices, so every browser starts from the defaults above */
+const SET = '6';
 export const variantStorageKey = (key: string) => `variant${SET}:${key}`;
 export const defaultValue = (g: VariantGroup) => g.default ?? g.options[0].value;
 

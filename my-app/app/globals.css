@@ -792,7 +792,8 @@ html.hero-dark .header-pill {
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.01em;
-  color: #79b231;
+  color: #36c37a; /* as "team" in Talk to our team (dark theme's accent), the same in both
+                     themes (Oct 10; was the logo's lime #79b231) */
   margin-top: -2.91px;
 }
 .header-logo img {

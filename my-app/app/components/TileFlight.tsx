@@ -170,6 +170,7 @@ export default function TileFlight() {
       fw.style.setProperty('--fx', `${cx.toFixed(1)}px`);
       fw.style.setProperty('--fy', `${cy.toFixed(1)}px`);
       fw.style.setProperty('--fr', `${(ring / 2).toFixed(1)}px`);
+      fwFlight.wake?.(); // the ring's loop rests while it sits still in its tile: moving it wakes it
     };
 
     const frame = () => {
@@ -206,7 +207,7 @@ export default function TileFlight() {
       fw.classList.toggle('is-flying', engaged);
       if (engaged !== fwFlight.active) {
         fwFlight.active = engaged;
-        if (engaged) fwFlight.wake?.();
+        fwFlight.wake?.(); // either way: taking off, or landing back in a section already on screen
       }
 
       /* only the ring leaves; the tile's glass square stays in the mosaic */
@@ -238,6 +239,7 @@ export default function TileFlight() {
         setRing(a.left + a.width / 2, a.top + a.height / 2, a.width * RING_SHARE, spin, 0);
         fw.style.setProperty('--fw-a', tileShown.toFixed(3));
         fw.style.setProperty('--fw-top', `${Math.max(0, fr.top).toFixed(1)}px`); // the backdrop copy stays inside the section
+        fwFlight.draw?.(); // drawn now, where the tile is this frame (flywheel.js)
       }
 
       if (flying) {
@@ -296,6 +298,13 @@ export default function TileFlight() {
     const kick = () => {
       idle = 0;
       if (!raf) raf = requestAnimationFrame(frame);
+    };
+    /* the hero calls this straight after it moves the tiles, so the ring follows its tile in
+     * the same frame rather than the next */
+    fwFlight.follow = () => {
+      if (raf) cancelAnimationFrame(raf);
+      idle = 0;
+      frame();
     };
 
     kick();
@@ -357,6 +366,7 @@ export default function TileFlight() {
     return () => {
       cancelAnimationFrame(raf);
       window.clearInterval(readyPoll);
+      fwFlight.follow = null;
       window.clearTimeout(snapIdle);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('wheel', onInput);

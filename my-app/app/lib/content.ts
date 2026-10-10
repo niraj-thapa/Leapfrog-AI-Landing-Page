@@ -317,21 +317,21 @@ export const INSIGHTS = {
   items: [
     {
       topic: 'Agentic roadmaps',
-      image: '/assets/insight-3.png',
+      image: '/assets/insight-3.jpg',
       title: 'Planning and running a multi-year agentic roadmap',
       takeaway: 'How to sequence agentic work by value so the tenth use case is faster than the first.',
       href: '/insights',
     },
     {
       topic: 'Data and AI',
-      image: '/assets/insight-2.png',
+      image: '/assets/insight-2.jpg',
       title: 'Securing GenAI: Vol. 9 - Safeguarding Agentic AI systems and integrations',
       takeaway: 'The controls that keep agents and their integrations safe in production.',
       href: '/insights',
     },
     {
       topic: 'Data and AI',
-      image: '/assets/insight-1.png',
+      image: '/assets/insight-1.jpg',
       title: 'When AI writes both code and tests: New risks QA engineers can’t ignore',
       takeaway: 'Why AI-written tests need independent review, and how to set that up.',
       href: '/insights',

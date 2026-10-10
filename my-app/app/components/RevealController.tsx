@@ -129,5 +129,15 @@ export default function RevealController() {
     };
   }, []);
 
+  /* the endless loops (the partner marquee, the agents' Live pulse) pause while off screen,
+   * so the page isn't animating what nobody can see (.is-offscreen in globals.css, Oct 10) */
+  useEffect(() => {
+    const io = new IntersectionObserver((entries) =>
+      entries.forEach((e) => e.target.classList.toggle('is-offscreen', !e.isIntersecting)),
+    );
+    document.querySelectorAll('.marquee, .ag-live-dot').forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
   return null;
 }

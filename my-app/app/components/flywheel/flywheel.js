@@ -8,8 +8,8 @@
 // one shared object per page (kept on window), so a hot reload of this file during
 // development cannot leave TileFlight and the ring talking to two different copies
 export const fwFlight = typeof window === 'undefined'
-  ? { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, wake: null, ready: false }
-  : (window.__fwFlight ??= { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, wake: null, ready: false });
+  ? { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, wake: null, follow: null, draw: null, ready: false }
+  : (window.__fwFlight ??= { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, wake: null, follow: null, draw: null, ready: false });
 /* calm 0 → 1: the ring as a small tile — no reflections, highlights or glare (they are
  * eased back in as it lands). */
 
@@ -20,7 +20,7 @@ export function initFlywheel(loadThree, opts = {}) {   // (ES modules are strict
  * opts.palette sets its backdrop, opts.ringPx(W, H) its size, and opts.pose (read every
  * frame: { scale, spin, tilt }) lets the page move it. */
 const decor = !!opts.decor;
-const FL = decor ? { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, wake: null, ready: false } : fwFlight;
+const FL = decor ? { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, wake: null, follow: null, draw: null, ready: false } : fwFlight;
 const cleanups = [];
 const on = (t, ev, fn, o) => { if (!t) return; t.addEventListener(ev, fn, o); cleanups.push(() => t.removeEventListener(ev, fn, o)); };
 let disposeGL = null, disposed = false;
@@ -986,9 +986,11 @@ function startGL(THREE) {
         : [x + r.width / 2, y, side];
     });
   }
-  const ro = new ResizeObserver(layout);
+  /* a new size clears the canvas: wake a ring resting in its tile so it draws again */
+  const relayout = () => { layout(); FL.wake?.(); };
+  const ro = new ResizeObserver(relayout);
   ro.observe(section);
-  on(window, 'fw:layout', layout);
+  on(window, 'fw:layout', relayout);
   if (document.fonts) document.fonts.ready.then(() => { if (!disposed) layout(); });
   layout();
 
@@ -1024,13 +1026,30 @@ function startGL(THREE) {
   const tGlow = new THREE.Color(), tMouse = new THREE.Vector2(), dyeCol = new THREE.Color();
   let glowAmt = 0, intro = 0, rotX = 0, rotY = 0, lightAmt = 0, cAmt = 0, ringSX = 0, ringSY = 0, ringSR = 200;
   let last = performance.now(), firstFrame = true, idleFor = 0, skip = false;
+  let dockSig = '', dockStill = 0;
 
-  function frame(now) {
+  /* following its tile, the ring is drawn by TileFlight (FL.draw) straight after the hero has
+   * moved the tiles, in the same frame — drawn from its own frame callback it showed the
+   * tile's place a frame late and trailed it 3–7px through the parallax (Oct 10). The own
+   * callback then skips the frame it would draw twice. */
+  let drawnSync = false;
+  function frame(now, sync) {
     if (!running || disposed) return;
-    requestAnimationFrame(frame);
+    if (sync !== true) {
+      requestAnimationFrame(frame);
+      if (drawnSync) { drawnSync = false; return; }
+    }
     const rm = reduceMotion.matches;
     const interacting = state.pointerIn || state.hot || state.sel || FL.active;
     if (!visible && !FL.active && !firstFrame) { running = false; return; }
+    /* docked in its hero tile (FL.calm 1) the liquid holds still, so once the ring has stopped
+     * moving and its colours have eased onto the tile (~4s) the loop stops: no frames while it
+     * just sits there. TileFlight wakes it (FL.wake) whenever the scroll moves it (Oct 10) */
+    if (FL.active && FL.calm >= 1 && !firstFrame && !(state.pointerIn || state.hot || state.sel)) {
+      const sig = `${FL.cx.toFixed(1)} ${FL.cy.toFixed(1)} ${FL.ring.toFixed(1)} ${FL.spin.toFixed(4)} ${FL.tilt.toFixed(4)}`;
+      if (sig !== dockSig) { dockSig = sig; dockStill = 0; }
+      else if (++dockStill > 240) { running = false; return; }
+    } else { dockSig = ''; dockStill = 0; }
     idleFor = interacting ? 0 : idleFor + (now - last) / 1000;
     if (idleFor > 3) { skip = !skip; if (skip) return; }       // idle: 30 fps
     const dt = Math.min(0.05, (now - last) / 1000);
@@ -1243,10 +1262,16 @@ function startGL(THREE) {
 
   let visible = true;
   const resume = () => {
-    if (!running && (visible || FL.active) && !document.hidden && !disposed) { running = true; last = performance.now(); requestAnimationFrame(frame); }
+    if (!running && (visible || FL.active) && !document.hidden && !disposed) { running = true; dockSig = ''; last = performance.now(); requestAnimationFrame(frame); }
   };
   const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (!visible && !FL.active) running = false; else resume(); });
   FL.wake = resume;
+  FL.draw = () => {
+    resume();
+    if (!running || disposed) return;
+    drawnSync = true;
+    frame(performance.now(), true);
+  };
   io.observe(section);
   on(document, 'visibilitychange', () => { if (document.hidden) running = false; else resume(); });
   requestAnimationFrame(frame);
@@ -1255,6 +1280,7 @@ function startGL(THREE) {
   return () => {
     running = false;
     FL.wake = null;
+    FL.draw = null;
     FL.ready = false;
     FL.active = false;
     io.disconnect();

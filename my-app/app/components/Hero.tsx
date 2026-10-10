@@ -305,13 +305,22 @@ export default function Hero() {
     return () => mq.removeEventListener('change', apply);
   }, []);
 
-  /* Hold the loop while the film is open (and always under reduced motion). */
+  /* Hold the loop while the film is open, while it is off screen (scrolled past the hero: no
+   * decoding the page can't see, Oct 10), and always under reduced motion. */
+  const [loopSeen, setLoopSeen] = useState(true);
   useEffect(() => {
     const v = loopRef.current;
     if (!v) return;
-    if (filmOpen || reduced) v.pause();
+    const io = new IntersectionObserver(([e]) => setLoopSeen(e.isIntersecting));
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
+  useEffect(() => {
+    const v = loopRef.current;
+    if (!v) return;
+    if (filmOpen || reduced || !loopSeen) v.pause();
     else void v.play().catch(() => {});
-  }, [filmOpen, reduced]);
+  }, [filmOpen, reduced, loopSeen]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -469,6 +478,8 @@ export default function Hero() {
       /* the scroll position is smoothed, then mapped and clamped, so the move
        * finishes crisply as the smoothed position passes the end of the morph */
       const wordsMoving = render(clamp01(shown / run), dt, shown);
+      /* the Flywheel ring sits on its tile: place and draw it now, after the tiles moved (TileFlight) */
+      (window as unknown as { __fwFlight?: { follow?: (() => void) | null } }).__fwFlight?.follow?.();
       if (shown !== target || wordsMoving) raf = requestAnimationFrame(tick);
       else last = 0;
     };

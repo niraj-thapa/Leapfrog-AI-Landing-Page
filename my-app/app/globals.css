@@ -1377,7 +1377,10 @@ html.hero-dark .header-menu a:hover {
   box-shadow: 0 10px 24px -10px rgba(13, 20, 17, 0.5);
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, calc(-50% + var(--py-video, 0px))) scale(0.7);
+  /* placed with translate (not transitioned), so it rides the video tile's parallax exactly;
+   * only the scale eases in (Oct 10: the transitioned transform trailed the tile ~10px) */
+  translate: -50% calc(-50% + var(--py-video, 0px));
+  transform: scale(0.7);
   transition:
     opacity 0.35s var(--ease-out),
     transform 0.45s var(--ease-out),
@@ -1391,11 +1394,11 @@ html.hero-dark .header-menu a:hover {
 .hero-play.is-on {
   opacity: 1;
   pointer-events: auto;
-  transform: translate(-50%, calc(-50% + var(--py-video, 0px))) scale(1);
+  transform: scale(1);
 }
 .hero-play.is-on:hover {
   background: #fff;
-  transform: translate(-50%, calc(-50% + var(--py-video, 0px))) scale(1.08);
+  transform: scale(1.08);
 }
 
 /* the header scrolls off at the top, hides on scroll down, returns on scroll up;
@@ -1570,7 +1573,7 @@ html.ring-live .tile-fly .ring-glass {
 }
 /* the Claude "Select Services Partner" lockup: near-square, as tall as the AWS badges' artwork */
 .badge-img--lockup {
-  height: 62px;
+  height: 60px; /* the full row: the Figma 589:1458 lockup runs to its bottom edge, so 62px was clipped */
 } /* soc2.svg: the Figma seal (Vyaguta Dashboard 575:1020, Oct 8), white */
 .anthropic {
   position: relative;
@@ -2489,7 +2492,7 @@ html.ring-live .tile-fly .ring-glass {
   height: 48px;
 }
 .why-partners .badge-img--lockup {
-  height: 52px;
+  height: 50px;
 }
 
 /* the workflow cards (AgentFlow, and the results steps): white, a dark icon tile, a tag */
@@ -2776,6 +2779,13 @@ html.ring-live .tile-fly .ring-glass {
   border-radius: 50%;
   border: 1.5px solid #19c37d;
   animation: ag-pulse 1.8s ease-out infinite;
+}
+/* off screen, the endless loops hold still (RevealController, Oct 10) */
+.is-offscreen,
+.is-offscreen *,
+.is-offscreen::before,
+.is-offscreen::after {
+  animation-play-state: paused !important;
 }
 @keyframes ag-pulse {
   from {
@@ -3309,6 +3319,9 @@ html[data-why="4"] .why-v4 {
   }
   .why-partners .badge-img--seal {
     height: 36px;
+  }
+  .why-partners .badge-img--lockup {
+    height: 38px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -5436,6 +5449,9 @@ html.sq-text [data-sq-rise].is-sq-in {
   }
   .badge-img--seal {
     height: 46px;
+  }
+  .badge-img--lockup {
+    height: 48px;
   }
   .why,
   .results,

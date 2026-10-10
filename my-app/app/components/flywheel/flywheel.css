@@ -1330,8 +1330,8 @@ html.sq-text .fw.head-waits .fw-head [data-sq-split]:not(.is-sq-in) .sq-wi {
 .fw-gl-back {
   display: none;
 }
-.fw.is-flight.is-flying .fw-gl-back {
-  display: block;
+.fw.is-flight.is-flying.back-on .fw-gl-back {
+  display: block; /* .back-on: the section is on screen (flywheel.js) — no copy, no layer before then */
   position: fixed;
   left: 0;
   top: 0;

@@ -947,17 +947,24 @@ function startGL(THREE) {
     const pull = Math.max(0, Math.round(s.top + s.height / 2 - rp / 2 - h.bottom + cur));
     if (Math.abs(pull - cur) > 0.5) section.style.setProperty('--ring-pull', pull + 'px');
   }
+  /* resizing the canvas wipes it (even to the same size), so it's resized only when the
+   * section's size really changes; layout() says whether it did (Oct 10) */
+  let sizedW = 0, sizedH = 0;
   function layout() {
     pullRing();
     liftPanels();
     const sr = section.getBoundingClientRect();
     W = Math.max(1, sr.width); H = Math.max(1, sr.height);
-    renderer.setSize(W, H, false);
-    const bw = Math.round(W * DPR), bh = Math.round(H * DPR);
-    U.res.value.set(bw, bh);
-    rtBg.setSize(Math.max(64, Math.round(W * 0.3)), Math.max(64, Math.round(H * 0.3)));
-    rtScene.setSize(Math.round(bw * 0.6), Math.round(bh * 0.6));
-    U.resScene.value.set(rtScene.width, rtScene.height);
+    const resized = W !== sizedW || H !== sizedH;
+    if (resized) {
+      sizedW = W; sizedH = H;
+      renderer.setSize(W, H, false);
+      const bw = Math.round(W * DPR), bh = Math.round(H * DPR);
+      U.res.value.set(bw, bh);
+      rtBg.setSize(Math.max(64, Math.round(W * 0.3)), Math.max(64, Math.round(H * 0.3)));
+      rtScene.setSize(Math.round(bw * 0.6), Math.round(bh * 0.6));
+      U.resScene.value.set(rtScene.width, rtScene.height);
+    }
     const s = slot.getBoundingClientRect();
     const cx = s.left - sr.left + s.width / 2, cy = s.top - sr.top + s.height / 2;
     camera.aspect = W / H;
@@ -985,9 +992,19 @@ function startGL(THREE) {
         : side === 'r' ? [x, y + r.height / 2, side]
         : [x + r.width / 2, y, side];
     });
+    return resized;
   }
-  /* a new size clears the canvas: wake a ring resting in its tile so it draws again */
-  const relayout = () => { layout(); FL.wake?.(); };
+  /* a new size wipes the canvas: draw it again at once, before this frame is painted (a
+   * ResizeObserver runs after the frame's animation callbacks) — waiting for the next frame
+   * left it blank for a frame, a flicker each time a phone's address bar came or went
+   * mid-swipe (Oct 10) */
+  const relayout = () => {
+    const resized = layout();
+    if (!resized || firstFrame) { FL.wake?.(); return; }
+    resume();
+    if (!running || disposed) return;
+    frame(performance.now(), true);
+  };
   const ro = new ResizeObserver(relayout);
   ro.observe(section);
   on(window, 'fw:layout', relayout);
@@ -1032,12 +1049,12 @@ function startGL(THREE) {
    * moved the tiles, in the same frame — drawn from its own frame callback it showed the
    * tile's place a frame late and trailed it 3–7px through the parallax (Oct 10). The own
    * callback then skips the frame it would draw twice. */
-  let drawnSync = false;
+  let drawnSyncAt = -1e9, drawnSig = '';
   function frame(now, sync) {
     if (!running || disposed) return;
     if (sync !== true) {
       requestAnimationFrame(frame);
-      if (drawnSync) { drawnSync = false; return; }
+      if (now - drawnSyncAt < 40) return;   // TileFlight is drawing it (FL.draw): leave it to that
     }
     const rm = reduceMotion.matches;
     const interacting = state.pointerIn || state.hot || state.sel || FL.active;
@@ -1253,7 +1270,13 @@ function startGL(THREE) {
     // in flight (TileFlight), a copy of the frame goes to the backdrop canvas behind the
     // section's text and cards, so the ring itself can fly over them while its backdrop
     // stays under them (Oct 8)
-    if (FL.active && backCtx && section.classList.contains('is-flying')) {
+    /* …only once the section has come onto the screen (it shows below the section's top):
+     * while the ring rides its tile in the hero there is nothing to show, and copying the
+     * canvas every frame (a read-back of a canvas over twice the screen's height on phones)
+     * stalled frames there — a flicker while swiping (Oct 10) */
+    const backOn = !!(FL.active && backCtx && section.classList.contains('is-flying') && section.getBoundingClientRect().top < window.innerHeight);
+    if (backOn !== section.classList.contains('back-on')) section.classList.toggle('back-on', backOn);
+    if (backOn) {
       if (backCanvas.width !== canvas.width || backCanvas.height !== canvas.height) { backCanvas.width = canvas.width; backCanvas.height = canvas.height; }
       backCtx.drawImage(canvas, 0, 0);
     }
@@ -1266,11 +1289,17 @@ function startGL(THREE) {
   };
   const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (!visible && !FL.active) running = false; else resume(); });
   FL.wake = resume;
+  /* once per frame — again only if the ring has moved since (the hero and TileFlight can
+   * both ask within one frame) */
   FL.draw = () => {
     resume();
     if (!running || disposed) return;
-    drawnSync = true;
-    frame(performance.now(), true);
+    const t = performance.now();
+    const sig = `${FL.cx} ${FL.cy} ${FL.ring} ${FL.spin} ${FL.tilt} ${FL.calm}`;
+    if (sig === drawnSig && t - drawnSyncAt < 12) return;
+    drawnSig = sig;
+    drawnSyncAt = t;
+    frame(t, true);
   };
   io.observe(section);
   on(document, 'visibilitychange', () => { if (document.hidden) running = false; else resume(); });

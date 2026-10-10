@@ -220,7 +220,13 @@ function TileBody({ t }: { t: Tile }) {
       return t.art === 'aws' ? <img src="/assets/badge-aws.svg" alt="" width={47} height={28} /> : <AnthropicMark />;
     case 'ring':
       /* a still of the Flywheel's own glass ring, so the tile and the flight match it */
-      return <img className="ring-glass" src="/assets/flywheel-ring.jpg" alt="" />;
+      return (
+        <>
+          <img className="ring-glass" src="/assets/flywheel-ring.jpg" alt="" />
+          {/* touch screens: the live ring's frames copied in, so it moves with the tile (TileFlight) */}
+          <canvas className="ring-copy" aria-hidden />
+        </>
+      );
     case 'video':
       return <img src={POSTER} alt="" />;
   }

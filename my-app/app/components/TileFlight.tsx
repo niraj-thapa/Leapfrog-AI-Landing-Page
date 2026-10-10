@@ -161,6 +161,9 @@ export default function TileFlight() {
     const landLine = () =>
       Math.max(0, (parseFloat(getComputedStyle(root).scrollPaddingTop) || 0) + (parseFloat(getComputedStyle(fw).scrollMarginTop) || 0));
 
+    const touchMq = window.matchMedia('(max-width: 820px), (pointer: coarse)');
+    const copyCv = tile.querySelector<HTMLCanvasElement>('.ring-copy');
+
     const setRing = (cx: number, cy: number, ring: number, spin: number, tilt: number) => {
       fwFlight.cx = cx;
       fwFlight.cy = cy;
@@ -234,6 +237,13 @@ export default function TileFlight() {
         landed = nowLanded;
       }
 
+      /* touch screens: while the ring rides its tile, its frames are copied into the tile's own
+       * canvas (globals.css .ring-copy), which moves with the tile exactly — some phones show
+       * the full-screen WebGL canvas a frame after the page, and it trailed the tile (Oct 10) */
+      const copyOn = following && live && touchMq.matches && !!copyCv;
+      if (copyOn !== root.classList.contains('ring-copy')) root.classList.toggle('ring-copy', copyOn);
+      fwFlight.copyTo = copyOn ? copyCv : null;
+      if (copyOn) fwFlight.copyBox = [a.left + a.width / 2, a.top + a.height / 2, a.width];
       if (following && live) {
         const spin = SPIN_LAND + SPIN_PER_PX * Math.max(0, fr.top - startTop); // continuous into the flight
         setRing(a.left + a.width / 2, a.top + a.height / 2, a.width * RING_SHARE, spin, 0);
@@ -366,6 +376,8 @@ export default function TileFlight() {
     return () => {
       cancelAnimationFrame(raf);
       window.clearInterval(readyPoll);
+      root.classList.remove('ring-copy');
+      fwFlight.copyTo = null;
       fwFlight.follow = null;
       window.clearTimeout(snapIdle);
       window.removeEventListener('scroll', onScroll);

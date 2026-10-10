@@ -1452,6 +1452,28 @@ html.ring-live .tile-fly .ring-glass {
 .hero-tile--ring.is-launched .ring-glass {
   visibility: hidden;
 }
+/* touch screens, while the ring sits on its tile (html.ring-copy, TileFlight): the live ring's
+ * frames are copied into the tile's own canvas (flywheel.js), which the tile moves, scales and
+ * fades like everything else on it — so the ring sticks to its tile as the play button does.
+ * The full-screen ring canvas, drawn alongside but shown a frame late by some phones, stays
+ * hidden until the ring takes off (Oct 10). Masked to the glass band as the live ring is
+ * (RING_SHARE 0.72 × its 0.505 / 0.53 / 0.975 / 0.995). */
+.hero-tile--ring .ring-copy {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  pointer-events: none;
+  -webkit-mask: radial-gradient(closest-side, transparent 36.36%, #000 38.16%, #000 70.2%, transparent 71.64%);
+  mask: radial-gradient(closest-side, transparent 36.36%, #000 38.16%, #000 70.2%, transparent 71.64%);
+}
+html.ring-copy .hero-tile--ring .ring-copy {
+  display: block;
+}
+html.ring-copy .fw.is-flight.is-flying .fw-gl {
+  visibility: hidden;
+}
 .tile-fly-bg {
   display: none;
 }

@@ -8,8 +8,8 @@
 // one shared object per page (kept on window), so a hot reload of this file during
 // development cannot leave TileFlight and the ring talking to two different copies
 export const fwFlight = typeof window === 'undefined'
-  ? { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, wake: null, follow: null, draw: null, ready: false }
-  : (window.__fwFlight ??= { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, wake: null, follow: null, draw: null, ready: false });
+  ? { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, copyTo: null, copyBox: null, wake: null, follow: null, draw: null, ready: false }
+  : (window.__fwFlight ??= { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, copyTo: null, copyBox: null, wake: null, follow: null, draw: null, ready: false });
 /* calm 0 → 1: the ring as a small tile — no reflections, highlights or glare (they are
  * eased back in as it lands). */
 
@@ -20,7 +20,7 @@ export function initFlywheel(loadThree, opts = {}) {   // (ES modules are strict
  * opts.palette sets its backdrop, opts.ringPx(W, H) its size, and opts.pose (read every
  * frame: { scale, spin, tilt }) lets the page move it. */
 const decor = !!opts.decor;
-const FL = decor ? { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, wake: null, follow: null, draw: null, ready: false } : fwFlight;
+const FL = decor ? { active: false, cx: 0, cy: 0, ring: 0, spin: 0, tilt: 0, calm: 0, copyTo: null, copyBox: null, wake: null, follow: null, draw: null, ready: false } : fwFlight;
 const cleanups = [];
 const on = (t, ev, fn, o) => { if (!t) return; t.addEventListener(ev, fn, o); cleanups.push(() => t.removeEventListener(ev, fn, o)); };
 let disposeGL = null, disposed = false;
@@ -1267,6 +1267,19 @@ function startGL(THREE) {
     renderer.render(waterScene, camera);
     renderer.setRenderTarget(null);
     renderer.render(mainScene, camera);
+    /* touch screens, the ring on its tile: this frame copied into the tile's own canvas
+     * (FL.copyTo, TileFlight), which moves with the tile; the full canvas is hidden meanwhile */
+    if (FL.active && FL.copyTo && FL.copyBox) {
+      const cv = FL.copyTo, [bx, by, bs] = FL.copyBox;
+      const k = canvas.width / W;   // canvas pixels per CSS pixel
+      const px = Math.max(1, Math.round((cv.clientWidth || bs) * k));
+      if (cv.width !== px) { cv.width = px; cv.height = px; }
+      const c2 = cv.getContext('2d');
+      if (c2) {
+        c2.clearRect(0, 0, px, px);
+        c2.drawImage(canvas, (bx - bs / 2) * k, (by - bs / 2) * k, bs * k, bs * k, 0, 0, px, px);
+      }
+    }
     // in flight (TileFlight), a copy of the frame goes to the backdrop canvas behind the
     // section's text and cards, so the ring itself can fly over them while its backdrop
     // stays under them (Oct 8)
